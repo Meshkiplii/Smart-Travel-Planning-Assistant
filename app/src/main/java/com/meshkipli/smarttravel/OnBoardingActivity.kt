@@ -172,7 +172,7 @@ fun OnboardingScreensPreview() {
 }
 
 // This would be your main activity
-class OnboardingActivity : ComponentActivity() {
+class OnBoardingActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
