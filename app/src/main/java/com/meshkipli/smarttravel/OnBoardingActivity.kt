@@ -56,28 +56,36 @@ fun OnboardingScreenTheme(content: @Composable () -> Unit) {
 fun OnboardingScreenPageContent(page: OnboardingPage, modifier: Modifier = Modifier) {
     Column(
         modifier = modifier
-            .fillMaxSize() // Changed to fillMaxSize to be used within Pager
+            .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
-            .padding(horizontal = 24.dp, vertical = 40.dp),
+            .padding(horizontal = 24.dp)
+            .padding(top = 40.dp, bottom = 20.dp), // Adjust overall vertical padding
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.SpaceBetween
+        // Remove Arrangement.SpaceBetween to have more control with Spacers or weights
     ) {
+        // Give the image section a specific proportion of the screen or a max height
         Box(
-            modifier = Modifier.weight(1f), // Image takes available space
+            modifier = Modifier
+                // .weight(0.6f) // Option A: Assign a weight, e.g., 60% of available space
+                .fillMaxWidth() // Ensure it can use the width
+                .heightIn(max = 300.dp) // Option B: Set a maximum height (adjust dp as needed)
+                .aspectRatio(1f, matchHeightConstraintsFirst = true), // Maintain aspect ratio within constraints
             contentAlignment = Alignment.Center
         ) {
             Image(
                 painter = painterResource(id = page.imageRes),
                 contentDescription = page.title,
                 modifier = Modifier
-                    .fillMaxWidth(0.9f)
-                    .aspectRatio(1f),
+                    .fillMaxSize(0.9f), // Fill 90% of the constrained Box
                 contentScale = ContentScale.Fit
             )
         }
+
+        Spacer(modifier = Modifier.height(32.dp)) // Adjust spacing as needed
+
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.padding(bottom = 32.dp) // Space before the FAB (which is now outside)
+            // Modifier.weight(0.4f) // If you used weight for the Box, text can take the rest
         ) {
             Text(
                 text = page.title,
@@ -93,9 +101,13 @@ fun OnboardingScreenPageContent(page: OnboardingPage, modifier: Modifier = Modif
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
+
+        // Add a flexible spacer at the bottom if you want to push text up
+        // when there's extra space (e.g., on very tall screens)
+        // This is only effective if the Column itself isn't using Arrangement.SpaceBetween
+        Spacer(modifier = Modifier.weight(1f))
     }
 }
-
 
 @OptIn(ExperimentalFoundationApi::class) // For HorizontalPager
 @Composable
