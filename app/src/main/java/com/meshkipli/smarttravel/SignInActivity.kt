@@ -1,5 +1,6 @@
 package com.meshkipli.smarttravel
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -8,7 +9,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Home // Assuming this was a placeholder for Google/Facebook
 import androidx.compose.material.icons.outlined.Email
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -18,6 +18,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -25,11 +27,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.meshkipli.smarttravel.ui.theme.SmartTravelTheme // Assuming you have this
 
-// You'll likely want to move AuthTextField, SocialLoginButton, OrContinueWithDivider
-// to a common file (e.g., CommonAuthComposables.kt) if they are used by both
-// SignInActivity and SignUpActivity. For this example, I'll keep them here for now.
 
-// --- Reusable Components (Consider moving to a common file) ---
 @Composable
 fun AuthTextField(
     value: String,
@@ -60,15 +58,15 @@ fun AuthTextField(
 @Composable
 fun SocialLoginButton(
     text: String,
-    iconPainter: Painter, // <-- Changed from @Composable () -> Unit to Painter
+    iconPainter: Painter,
     backgroundColor: Color,
     contentColor: Color,
     onClick: () -> Unit,
-    modifier: Modifier = Modifier // Added modifier parameter
+    modifier: Modifier = Modifier
 ) {
     Button(
         onClick = onClick,
-        modifier = modifier // Use the passed modifier
+        modifier = modifier
             .fillMaxWidth()
             .height(56.dp),
         shape = RoundedCornerShape(12.dp),
@@ -117,7 +115,8 @@ fun SignInScreen(
     onNavigateBack: () -> Unit, // For back navigation
     onSignInWithEmail: (email: String) -> Unit,
     onSignInWithGoogle: () -> Unit,
-    onSignInWithFacebook: () -> Unit
+    onSignInWithFacebook: () -> Unit,
+    onNavigateToSignUp: () -> Unit
 ) {
     var email by remember { mutableStateOf("") }
 
@@ -190,30 +189,57 @@ fun SignInScreen(
             ) {
                 Text("Continue", fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
             }
+
+            Spacer(modifier = Modifier.height(16.dp)) // Space between Continue button and Sign Up text
+
+            // "Don't have an account? Sign Up" TextButton
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    "Don't have an account? ",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = Color.Gray
+                )
+                TextButton(onClick = onNavigateToSignUp) {
+                    Text(
+                        "Sign Up",
+                        style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
+                        color = colorResource(id = R.color.primary) // <-- Corrected: Use colorResource()
+                    )
+                }
+            }
+            Spacer(modifier = Modifier.height(16.dp)) // Bottom padding
+        }
         }
     }
-}
+
 
 class SignInActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            SmartTravelTheme { // Replace with your actual theme
+            SmartTravelTheme {
+                val context = LocalContext.current
                 SignInScreen(
-                    onNavigateBack = { finish() }, // Finishes SignInActivity
+                    onNavigateBack = { finish() },
                     onSignInWithEmail = { email ->
-                        // Handle sign in with email logic
                         println("Sign in with email: $email")
-                        // Navigate to next screen or show loading
                     },
                     onSignInWithGoogle = {
-                        // Handle Google sign in
                         println("Sign in with Google")
                     },
                     onSignInWithFacebook = {
-                        // Handle Facebook sign in
                         println("Sign in with Facebook")
+                    },
+                    onNavigateToSignUp = { // Implement the navigation
+                        val intent = Intent(context, SignUpActivity::class.java)
+                         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                        context.startActivity(intent)
                     }
+
                 )
             }
         }
@@ -229,7 +255,8 @@ fun SignInScreenPreview() {
             onNavigateBack = {},
             onSignInWithEmail = {},
             onSignInWithGoogle = {},
-            onSignInWithFacebook = {}
+            onSignInWithFacebook = {},
+            onNavigateToSignUp = {}
         )
     }
 }
