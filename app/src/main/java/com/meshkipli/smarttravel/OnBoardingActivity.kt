@@ -1,32 +1,33 @@
 package com.meshkipli.smarttravel
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.annotation.DrawableRes
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.pager.HorizontalPager // Import HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState // Import rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext // Import LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-
-// A placeholder for your actual drawable resources
-// In a real project, you would have these drawables in your res/drawable folder
-
+import kotlinx.coroutines.launch // Import launch for coroutine scope
 
 // Data class to represent the content of each onboarding screen
 data class OnboardingPage(
@@ -35,58 +36,52 @@ data class OnboardingPage(
     val subtitle: String
 )
 
-// Main App Theme (so we can use Material3 components)
+// Main App Theme (so we can use Material3 components) - Assuming this is defined elsewhere or here
 @Composable
 fun OnboardingScreenTheme(content: @Composable () -> Unit) {
     MaterialTheme(
-        colorScheme = lightColorScheme(
+        colorScheme = lightColorScheme( // Example colors
+            primary = Color(0xFFF9882B),
             background = Color.White,
             onBackground = Color.Black,
             onSurfaceVariant = Color.Gray
         ),
-        typography = Typography(),
+        typography = Typography(), // Assuming you have Typography defined
         content = content
     )
 }
 
-// Reusable composable for a single onboarding screen
+// Reusable composable for a single onboarding screen content (without FAB)
 @Composable
-fun OnboardingScreen(page: OnboardingPage) {
+fun OnboardingScreenPageContent(page: OnboardingPage, modifier: Modifier = Modifier) {
     Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(812.dp) // Typical screen height for preview
+        modifier = modifier
+            .fillMaxSize() // Changed to fillMaxSize to be used within Pager
             .background(MaterialTheme.colorScheme.background)
             .padding(horizontal = 24.dp, vertical = 40.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.SpaceBetween // Distributes space between elements
+        verticalArrangement = Arrangement.SpaceBetween
     ) {
-        // Top Image
         Box(
-            modifier = Modifier.weight(1f),
+            modifier = Modifier.weight(1f), // Image takes available space
             contentAlignment = Alignment.Center
         ) {
-            // Note: Ensure your drawable resource includes the yellow blob background
             Image(
                 painter = painterResource(id = page.imageRes),
                 contentDescription = page.title,
                 modifier = Modifier
                     .fillMaxWidth(0.9f)
-                    .aspectRatio(1f), // Maintain a square-like aspect ratio
+                    .aspectRatio(1f),
                 contentScale = ContentScale.Fit
             )
         }
-
-        // Middle Text Content
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.padding(bottom = 32.dp)
+            modifier = Modifier.padding(bottom = 32.dp) // Space before the FAB (which is now outside)
         ) {
             Text(
                 text = page.title,
-                style = MaterialTheme.typography.headlineMedium.copy(
-                    fontWeight = FontWeight.Bold
-                ),
+                style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold),
                 textAlign = TextAlign.Center,
                 color = MaterialTheme.colorScheme.onBackground
             )
@@ -98,89 +93,123 @@ fun OnboardingScreen(page: OnboardingPage) {
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
+    }
+}
 
-        // Bottom Action Button
+
+@OptIn(ExperimentalFoundationApi::class) // For HorizontalPager
+@Composable
+fun OnboardingPagerScreen(onboardingPages: List<OnboardingPage>, onFinish: () -> Unit) {
+    val pagerState = rememberPagerState(pageCount = { onboardingPages.size })
+    val scope = rememberCoroutineScope()
+    val context = LocalContext.current // Get context for starting activity
+
+    Box(modifier = Modifier.fillMaxSize()) {
+        HorizontalPager(
+            state = pagerState,
+            modifier = Modifier.fillMaxSize()
+        ) { pageIndex ->
+            OnboardingScreenPageContent(page = onboardingPages[pageIndex])
+        }
+
+        // FAB at the bottom, aligned to center
         FloatingActionButton(
-            onClick = { /* Handle button click */ },
-            containerColor = Color(0xFFF9882B), // Specific orange from the image
+            onClick = {
+                if (pagerState.currentPage < onboardingPages.size - 1) {
+                    scope.launch {
+                        pagerState.animateScrollToPage(pagerState.currentPage + 1)
+                    }
+                } else {
+                    // Last page: Navigate to LoginActivity
+                    onFinish()
+                }
+            },
+            containerColor = Color(0xFFF9882B),
             contentColor = Color.White,
             shape = CircleShape,
-            modifier = Modifier.size(72.dp)
+            modifier = Modifier
+                .align(Alignment.BottomCenter) // Align FAB to bottom center
+                .padding(bottom = 60.dp) // Adjust padding as needed
+                .size(72.dp)
         ) {
             Image(
-                painter = painterResource(id = R.drawable.ic_step_next), // Correct
+                painter = painterResource(id = R.drawable.ic_step_next),
                 contentDescription = "Next",
                 modifier = Modifier.size(36.dp)
             )
         }
-    }
-}
 
-// Preview composable to display all three screens
-@Preview(showBackground = true)
-@Composable
-fun OnboardingScreensPreview() {
-    // Dummy data for the preview
-    val pages = listOf(
-        OnboardingPage(
-            imageRes = R.drawable.traveling_ill,
-            title = "Make your own private\ntravel plan",
-            subtitle = "Formulate your strategy to receive\nwonderful gift packs"
-        ),
-        OnboardingPage(
-            imageRes = R.drawable.sitting_ill,
-            title = "Customize your\nHigh-end travel",
-            subtitle = "Countless high-end\nentertainment facilities"
-        ),
-        OnboardingPage(
-            imageRes = R.drawable.beach_ill,
-            title = "High-end leisure projects\nto choose from",
-            subtitle = "The world's first-class modern leisure\nand entertainment method"
-        )
-    )
-
-    OnboardingScreenTheme {
-        // The Column is scrollable to show all screens in the preview
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState())
+        // Optional: Add page indicators (dots)
+        Row(
+            Modifier
+                .align(Alignment.BottomCenter)
+                .padding(bottom = 24.dp) // Position above/below FAB as you like
+                .fillMaxWidth(),
+            horizontalArrangement = Arrangement.Center
         ) {
-            pages.forEach { page ->
-                // This is a placeholder as previews don't have real resources
-                // In a real app, you'd use a HorizontalPager to swipe between them.
-                val imageToDisplay = when (page.title.first()) {
-                    'M' -> R.drawable.traveling_ill
-                    'C' -> R.drawable.sitting_ill
-                    else -> R.drawable.beach_ill
-                }
-                // In a real app with resources, you'd just use page.imageRes
-                OnboardingScreen(page = page.copy(imageRes = imageToDisplay))
-                // Add a divider for better separation in the preview
-                if (page != pages.last()) {
-                    Divider(color = Color.LightGray, thickness = 8.dp)
-                }
+            repeat(onboardingPages.size) { iteration ->
+                val color = if (pagerState.currentPage == iteration) MaterialTheme.colorScheme.primary else Color.LightGray
+                Box(
+                    modifier = Modifier
+                        .padding(4.dp)
+                        .background(color, CircleShape)
+                        .size(12.dp)
+                )
             }
         }
     }
 }
 
-// This would be your main activity
+
 class OnBoardingActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContent {
-            // In a real app, you would likely use a HorizontalPager from Accompanist
-            // or the official Foundation library to create a swipeable onboarding flow.
-            // For this example, we'll just show the first screen.
-            val firstPage = OnboardingPage(
-                imageRes = R.drawable.traveling_ill,
+
+        // Sample onboarding pages (ensure these drawables exist)
+        val onboardingPages = listOf(
+            OnboardingPage(
+                imageRes = R.drawable.traveling_ill, // Replace with your actual drawable
                 title = "Make your own private\ntravel plan",
                 subtitle = "Formulate your strategy to receive\nwonderful gift packs"
+            ),
+            OnboardingPage(
+                imageRes = R.drawable.sitting_ill, // Replace with your actual drawable
+                title = "Customize your\nHigh-end travel",
+                subtitle = "Countless high-end\nentertainment facilities"
+            ),
+            OnboardingPage(
+                imageRes = R.drawable.beach_ill, // Replace with your actual drawable
+                title = "High-end leisure projects\nto choose from",
+                subtitle = "The world's first-class modern leisure\nand entertainment method"
             )
+        )
+
+        setContent {
             OnboardingScreenTheme {
-                OnboardingScreen(page = firstPage)
+                OnboardingPagerScreen(
+                    onboardingPages = onboardingPages,
+                    onFinish = {
+                        // Navigate to LoginActivity
+                        val intent = Intent(this@OnBoardingActivity, SignInActivity::class.java)
+                        startActivity(intent)
+                        finish() // Finish OnBoardingActivity so user can't go back to it
+                    }
+                )
             }
         }
+    }
+}
+
+// Preview for OnboardingPagerScreen
+@Preview(showBackground = true)
+@Composable
+fun OnboardingPagerScreenPreview() {
+    val previewPages = listOf(
+        OnboardingPage(R.drawable.traveling_ill, "Title 1", "Subtitle 1"),
+        OnboardingPage(R.drawable.sitting_ill, "Title 2", "Subtitle 2"),
+        OnboardingPage(R.drawable.beach_ill, "Title 3", "Subtitle 3")
+    )
+    OnboardingScreenTheme {
+        OnboardingPagerScreen(onboardingPages = previewPages, onFinish = { /* Preview doesn't navigate */ })
     }
 }
