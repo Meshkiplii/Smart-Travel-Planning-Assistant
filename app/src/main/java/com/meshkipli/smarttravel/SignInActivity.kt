@@ -25,7 +25,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.meshkipli.smarttravel.ui.theme.SmartTravelTheme // Assuming you have this
+import com.meshkipli.smarttravel.ui.theme.SmartTravelTheme
 
 
 @Composable
@@ -77,12 +77,11 @@ fun SocialLoginButton(
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            // horizontalArrangement = Arrangement.Center // Let Button handle overall centering
         ) {
-            Image( // <-- Use Image composable
+            Image(
                 painter = iconPainter,
-                contentDescription = "$text logo", // More descriptive
-                modifier = Modifier.size(24.dp) // Control icon size
+                contentDescription = "$text logo",
+                modifier = Modifier.size(24.dp)
             )
             Spacer(modifier = Modifier.width(12.dp))
             Text(text, fontWeight = FontWeight.SemiBold, fontSize = 16.sp)
@@ -108,11 +107,10 @@ fun OrContinueWithDivider() {
 }
 
 
-// --- Screen Implementation ---
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SignInScreen(
-    onNavigateBack: () -> Unit, // For back navigation
+    onNavigateBack: () -> Unit,
     onSignInWithEmail: (email: String) -> Unit,
     onSignInWithGoogle: () -> Unit,
     onSignInWithFacebook: () -> Unit,
@@ -125,7 +123,7 @@ fun SignInScreen(
             TopAppBar(
                 title = {},
                 navigationIcon = {
-                    IconButton(onClick = onNavigateBack) { // Use lambda for back press
+                    IconButton(onClick = onNavigateBack) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Back"
@@ -190,9 +188,9 @@ fun SignInScreen(
                 Text("Continue", fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
             }
 
-            Spacer(modifier = Modifier.height(16.dp)) // Space between Continue button and Sign Up text
+            Spacer(modifier = Modifier.height(16.dp))
 
-            // "Don't have an account? Sign Up" TextButton
+
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.Center,
@@ -211,7 +209,7 @@ fun SignInScreen(
                     )
                 }
             }
-            Spacer(modifier = Modifier.height(16.dp)) // Bottom padding
+            Spacer(modifier = Modifier.height(16.dp))
         }
         }
     }
@@ -234,7 +232,7 @@ class SignInActivity : ComponentActivity() {
                     onSignInWithFacebook = {
                         println("Sign in with Facebook")
                     },
-                    onNavigateToSignUp = { // Implement the navigation
+                    onNavigateToSignUp = {
                         val intent = Intent(context, SignUpActivity::class.java)
                          intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
                         context.startActivity(intent)
