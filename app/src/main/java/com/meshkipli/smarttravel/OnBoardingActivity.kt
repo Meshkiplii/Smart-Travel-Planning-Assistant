@@ -107,8 +107,8 @@ fun OnboardingScreen(page: OnboardingPage) {
             shape = CircleShape,
             modifier = Modifier.size(72.dp)
         ) {
-            Icon(
-                imageVector = Icons.Filled.PlayArrow,
+            Image(
+                painter = painterResource(id = R.drawable.ic_step_next), // Correct
                 contentDescription = "Next",
                 modifier = Modifier.size(36.dp)
             )
