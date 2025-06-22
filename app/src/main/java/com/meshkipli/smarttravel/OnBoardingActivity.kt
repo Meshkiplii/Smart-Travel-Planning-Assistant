@@ -26,13 +26,7 @@ import androidx.compose.ui.unit.dp
 
 // A placeholder for your actual drawable resources
 // In a real project, you would have these drawables in your res/drawable folder
-object R {
-    object drawable {
-        const val onboarding_1 = 0 // Replace with your actual resource ID
-        const val onboarding_2 = 0 // Replace with your actual resource ID
-        const val onboarding_3 = 0 // Replace with your actual resource ID
-    }
-}
+
 
 // Data class to represent the content of each onboarding screen
 data class OnboardingPage(
@@ -129,17 +123,17 @@ fun OnboardingScreensPreview() {
     // Dummy data for the preview
     val pages = listOf(
         OnboardingPage(
-            imageRes = R.drawable.onboarding_1,
+            imageRes = R.drawable.traveling_ill,
             title = "Make your own private\ntravel plan",
             subtitle = "Formulate your strategy to receive\nwonderful gift packs"
         ),
         OnboardingPage(
-            imageRes = R.drawable.onboarding_2,
+            imageRes = R.drawable.sitting_ill,
             title = "Customize your\nHigh-end travel",
             subtitle = "Countless high-end\nentertainment facilities"
         ),
         OnboardingPage(
-            imageRes = R.drawable.onboarding_3,
+            imageRes = R.drawable.beach_ill,
             title = "High-end leisure projects\nto choose from",
             subtitle = "The world's first-class modern leisure\nand entertainment method"
         )
@@ -156,9 +150,9 @@ fun OnboardingScreensPreview() {
                 // This is a placeholder as previews don't have real resources
                 // In a real app, you'd use a HorizontalPager to swipe between them.
                 val imageToDisplay = when (page.title.first()) {
-                    'M' -> R.drawable.onboarding_1
-                    'C' -> R.drawable.onboarding_2
-                    else -> R.drawable.onboarding_3
+                    'M' -> R.drawable.traveling_ill
+                    'C' -> R.drawable.sitting_ill
+                    else -> R.drawable.beach_ill
                 }
                 // In a real app with resources, you'd just use page.imageRes
                 OnboardingScreen(page = page.copy(imageRes = imageToDisplay))
@@ -180,7 +174,7 @@ class OnBoardingActivity : ComponentActivity() {
             // or the official Foundation library to create a swipeable onboarding flow.
             // For this example, we'll just show the first screen.
             val firstPage = OnboardingPage(
-                imageRes = R.drawable.onboarding_1,
+                imageRes = R.drawable.traveling_ill,
                 title = "Make your own private\ntravel plan",
                 subtitle = "Formulate your strategy to receive\nwonderful gift packs"
             )
