@@ -2,6 +2,7 @@ package com.meshkipli.smarttravel
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -9,6 +10,8 @@ import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.outlined.Email
 import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material3.*
@@ -86,7 +89,7 @@ fun SocialLoginButton(
             // In a real app, use painterResource(id = iconResId)
             // Using a placeholder icon as resource is not available.
             Icon(
-                imageVector = if (text.contains("Apple")) Icons.Default.ChatBubble else Icons.Default.ChatBubble,
+                imageVector = if (text.contains("Google")) Icons.Default.Home else Icons.Default.Home ,
                 contentDescription = text,
                 modifier = Modifier.size(24.dp)
             )
@@ -272,18 +275,24 @@ fun SignUpScreen() {
                 )
                 Spacer(modifier = Modifier.height(24.dp))
 
+                // --- Checkbox with Terms Text ---
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
+                    // Making the whole row clickable to toggle the checkbox is a common UX pattern
                     modifier = Modifier.clickable { termsAccepted = !termsAccepted }
                 ) {
-                    // This is a custom checkbox-like icon from the design
-                    Icon(
-                        imageVector = R.drawable.ic_chat_bubble,
-                        contentDescription = "Terms of Service",
-                        tint = if (termsAccepted) orangeColor else Color.Gray,
-                        modifier = Modifier.size(24.dp)
+                    Checkbox(
+                        checked = termsAccepted,
+                        onCheckedChange = { termsAccepted = it },
+                        colors = CheckboxDefaults.colors(
+                            checkedColor = orangeColor, // Color when checked
+                            uncheckedColor = Color.Gray, // Color when unchecked
+                            checkmarkColor = Color.White // Color of the checkmark itself
+                        )
                     )
-                    Spacer(modifier = Modifier.width(12.dp))
+                    // Removed Spacer here to make text closer to checkbox, adjust if needed
+                    // Spacer(modifier = Modifier.width(8.dp)) // Adjust spacing as needed
+
                     val annotatedString = buildAnnotatedString {
                         append("I have read the ")
                         pushStringAnnotation(tag = "TOS", annotation = "terms_of_service_url")
@@ -297,12 +306,14 @@ fun SignUpScreen() {
                         onClick = { offset ->
                             annotatedString.getStringAnnotations(tag = "TOS", start = offset, end = offset)
                                 .firstOrNull()?.let {
-                                    // Handle Terms of Service click
+                                    // Handle Terms of Service click (e.g., open a web browser or another screen)
+                                    println("Terms of Service clicked!")
                                 }
                         },
                         style = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onBackground)
                     )
                 }
+                // --- End of Checkbox with Terms Text ---
             }
 
             Spacer(modifier = Modifier.height(16.dp))
