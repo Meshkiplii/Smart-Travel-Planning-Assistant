@@ -9,7 +9,6 @@ import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.ChatBubble
 import androidx.compose.material.icons.outlined.Email
 import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material3.*
@@ -30,13 +29,7 @@ import androidx.compose.ui.unit.sp
 
 // A placeholder for your actual drawable resources
 // In a real project, you would have these drawables in your res/drawable folder
-object R {
-    object drawable {
-        // Replace with your actual vector drawables
-        const val ic_apple_logo = 0
-        const val ic_facebook_logo = 0
-    }
-}
+
 
 
 // --- Reusable Components ---
@@ -170,8 +163,8 @@ fun SignInScreen() {
                 OrContinueWithDivider()
                 Spacer(modifier = Modifier.height(32.dp))
                 SocialLoginButton(
-                    text = "Continue with Apple",
-                    iconResId = R.drawable.ic_apple_logo,
+                    text = "Continue with Google",
+                    iconResId = R.drawable.ic_google_logo,
                     backgroundColor = Color.Black,
                     contentColor = Color.White,
                     onClick = {}
@@ -285,7 +278,7 @@ fun SignUpScreen() {
                 ) {
                     // This is a custom checkbox-like icon from the design
                     Icon(
-                        imageVector = Icons.Filled.ChatBubble,
+                        imageVector = R.drawable.ic_chat_bubble,
                         contentDescription = "Terms of Service",
                         tint = if (termsAccepted) orangeColor else Color.Gray,
                         modifier = Modifier.size(24.dp)
