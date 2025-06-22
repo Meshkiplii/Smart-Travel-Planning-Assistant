@@ -8,8 +8,8 @@ import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen // 
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
-        // Handle the splash screen transition.
-        val splashScreen = installSplashScreen() // Call this before super.onCreate()
+
+        val splashScreen = installSplashScreen()
 
         super.onCreate(savedInstanceState)
 
