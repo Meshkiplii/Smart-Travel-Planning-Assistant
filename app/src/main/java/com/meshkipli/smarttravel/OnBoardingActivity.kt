@@ -9,11 +9,9 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.pager.HorizontalPager // Import HorizontalPager
-import androidx.compose.foundation.pager.rememberPagerState // Import rememberPagerState
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
@@ -21,37 +19,34 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext // Import LocalContext
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import kotlinx.coroutines.launch // Import launch for coroutine scope
+import kotlinx.coroutines.launch
 
-// Data class to represent the content of each onboarding screen
 data class OnboardingPage(
     @DrawableRes val imageRes: Int,
     val title: String,
     val subtitle: String
 )
 
-// Main App Theme (so we can use Material3 components) - Assuming this is defined elsewhere or here
 @Composable
 fun OnboardingScreenTheme(content: @Composable () -> Unit) {
     MaterialTheme(
-        colorScheme = lightColorScheme( // Example colors
+        colorScheme = lightColorScheme(
             primary = Color(0xFFF9882B),
             background = Color.White,
             onBackground = Color.Black,
             onSurfaceVariant = Color.Gray
         ),
-        typography = Typography(), // Assuming you have Typography defined
+        typography = Typography(),
         content = content
     )
 }
 
-// Reusable composable for a single onboarding screen content (without FAB)
 @Composable
 fun OnboardingScreenPageContent(page: OnboardingPage, modifier: Modifier = Modifier) {
     Column(
@@ -59,33 +54,30 @@ fun OnboardingScreenPageContent(page: OnboardingPage, modifier: Modifier = Modif
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
             .padding(horizontal = 24.dp)
-            .padding(top = 40.dp, bottom = 20.dp), // Adjust overall vertical padding
+            .padding(top = 40.dp, bottom = 20.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
-        // Remove Arrangement.SpaceBetween to have more control with Spacers or weights
+
     ) {
-        // Give the image section a specific proportion of the screen or a max height
         Box(
             modifier = Modifier
-                // .weight(0.6f) // Option A: Assign a weight, e.g., 60% of available space
-                .fillMaxWidth() // Ensure it can use the width
-                .heightIn(max = 300.dp) // Option B: Set a maximum height (adjust dp as needed)
-                .aspectRatio(1f, matchHeightConstraintsFirst = true), // Maintain aspect ratio within constraints
+                .fillMaxWidth()
+                .heightIn(max = 300.dp)
+                .aspectRatio(1f, matchHeightConstraintsFirst = true),
             contentAlignment = Alignment.Center
         ) {
             Image(
                 painter = painterResource(id = page.imageRes),
                 contentDescription = page.title,
                 modifier = Modifier
-                    .fillMaxSize(0.9f), // Fill 90% of the constrained Box
+                    .fillMaxSize(0.9f),
                 contentScale = ContentScale.Fit
             )
         }
 
-        Spacer(modifier = Modifier.height(32.dp)) // Adjust spacing as needed
+        Spacer(modifier = Modifier.height(32.dp))
 
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            // Modifier.weight(0.4f) // If you used weight for the Box, text can take the rest
         ) {
             Text(
                 text = page.title,
@@ -102,19 +94,16 @@ fun OnboardingScreenPageContent(page: OnboardingPage, modifier: Modifier = Modif
             )
         }
 
-        // Add a flexible spacer at the bottom if you want to push text up
-        // when there's extra space (e.g., on very tall screens)
-        // This is only effective if the Column itself isn't using Arrangement.SpaceBetween
         Spacer(modifier = Modifier.weight(1f))
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class) // For HorizontalPager
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun OnboardingPagerScreen(onboardingPages: List<OnboardingPage>, onFinish: () -> Unit) {
     val pagerState = rememberPagerState(pageCount = { onboardingPages.size })
     val scope = rememberCoroutineScope()
-    val context = LocalContext.current // Get context for starting activity
+    val context = LocalContext.current
 
     Box(modifier = Modifier.fillMaxSize()) {
         HorizontalPager(
@@ -124,7 +113,6 @@ fun OnboardingPagerScreen(onboardingPages: List<OnboardingPage>, onFinish: () ->
             OnboardingScreenPageContent(page = onboardingPages[pageIndex])
         }
 
-        // FAB at the bottom, aligned to center
         FloatingActionButton(
             onClick = {
                 if (pagerState.currentPage < onboardingPages.size - 1) {
@@ -132,7 +120,6 @@ fun OnboardingPagerScreen(onboardingPages: List<OnboardingPage>, onFinish: () ->
                         pagerState.animateScrollToPage(pagerState.currentPage + 1)
                     }
                 } else {
-                    // Last page: Navigate to LoginActivity
                     onFinish()
                 }
             },
@@ -140,8 +127,8 @@ fun OnboardingPagerScreen(onboardingPages: List<OnboardingPage>, onFinish: () ->
             contentColor = Color.White,
             shape = CircleShape,
             modifier = Modifier
-                .align(Alignment.BottomCenter) // Align FAB to bottom center
-                .padding(bottom = 60.dp) // Adjust padding as needed
+                .align(Alignment.BottomCenter)
+                .padding(bottom = 60.dp)
                 .size(72.dp)
         ) {
             Image(
@@ -151,11 +138,11 @@ fun OnboardingPagerScreen(onboardingPages: List<OnboardingPage>, onFinish: () ->
             )
         }
 
-        // Optional: Add page indicators (dots)
+
         Row(
             Modifier
                 .align(Alignment.BottomCenter)
-                .padding(bottom = 24.dp) // Position above/below FAB as you like
+                .padding(bottom = 24.dp)
                 .fillMaxWidth(),
             horizontalArrangement = Arrangement.Center
         ) {
@@ -177,20 +164,20 @@ class OnBoardingActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // Sample onboarding pages (ensure these drawables exist)
+
         val onboardingPages = listOf(
             OnboardingPage(
-                imageRes = R.drawable.traveling_ill, // Replace with your actual drawable
+                imageRes = R.drawable.traveling_ill,
                 title = "Make your own private\ntravel plan",
                 subtitle = "Formulate your strategy to receive\nwonderful gift packs"
             ),
             OnboardingPage(
-                imageRes = R.drawable.sitting_ill, // Replace with your actual drawable
+                imageRes = R.drawable.sitting_ill,
                 title = "Customize your\nHigh-end travel",
                 subtitle = "Countless high-end\nentertainment facilities"
             ),
             OnboardingPage(
-                imageRes = R.drawable.beach_ill, // Replace with your actual drawable
+                imageRes = R.drawable.beach_ill,
                 title = "High-end leisure projects\nto choose from",
                 subtitle = "The world's first-class modern leisure\nand entertainment method"
             )
@@ -201,10 +188,9 @@ class OnBoardingActivity : ComponentActivity() {
                 OnboardingPagerScreen(
                     onboardingPages = onboardingPages,
                     onFinish = {
-                        // Navigate to LoginActivity
                         val intent = Intent(this@OnBoardingActivity, SignInActivity::class.java)
                         startActivity(intent)
-                        finish() // Finish OnBoardingActivity so user can't go back to it
+                        finish()
                     }
                 )
             }
@@ -212,7 +198,7 @@ class OnBoardingActivity : ComponentActivity() {
     }
 }
 
-// Preview for OnboardingPagerScreen
+
 @Preview(showBackground = true)
 @Composable
 fun OnboardingPagerScreenPreview() {
