@@ -3,6 +3,7 @@ package com.meshkipli.smarttravel
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -16,6 +17,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -57,16 +60,15 @@ fun AuthTextField(
 @Composable
 fun SocialLoginButton(
     text: String,
-    // Use a placeholder if actual iconResId is not critical for this separation step
-    // In a real app, ensure R.drawable.your_icon exists if using painterResource
-    icon: @Composable () -> Unit, // Changed to accept a composable for more flexibility
+    iconPainter: Painter, // <-- Changed from @Composable () -> Unit to Painter
     backgroundColor: Color,
     contentColor: Color,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier // Added modifier parameter
 ) {
     Button(
         onClick = onClick,
-        modifier = Modifier
+        modifier = modifier // Use the passed modifier
             .fillMaxWidth()
             .height(56.dp),
         shape = RoundedCornerShape(12.dp),
@@ -77,9 +79,13 @@ fun SocialLoginButton(
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Center
+            // horizontalArrangement = Arrangement.Center // Let Button handle overall centering
         ) {
-            icon()
+            Image( // <-- Use Image composable
+                painter = iconPainter,
+                contentDescription = "$text logo", // More descriptive
+                modifier = Modifier.size(24.dp) // Control icon size
+            )
             Spacer(modifier = Modifier.width(12.dp))
             Text(text, fontWeight = FontWeight.SemiBold, fontSize = 16.sp)
         }
@@ -159,7 +165,7 @@ fun SignInScreen(
                 Spacer(modifier = Modifier.height(32.dp))
                 SocialLoginButton(
                     text = "Continue with Google",
-                    icon = { Icon(Icons.Filled.Home, "Google", modifier = Modifier.size(24.dp)) /* Placeholder */ },
+                    iconPainter = painterResource(id = R.drawable.ic_google_logo),
                     backgroundColor = Color.Black,
                     contentColor = Color.White,
                     onClick = onSignInWithGoogle
@@ -167,7 +173,7 @@ fun SignInScreen(
                 Spacer(modifier = Modifier.height(16.dp))
                 SocialLoginButton(
                     text = "Continue with Facebook",
-                    icon = { Icon(Icons.Filled.Home, "Facebook", modifier = Modifier.size(24.dp)) /* Placeholder */ },
+                    iconPainter = painterResource(id = R.drawable.ic_facebook_logo),
                     backgroundColor = Color(0xFF3B5998),
                     contentColor = Color.White,
                     onClick = onSignInWithFacebook
@@ -214,10 +220,16 @@ class SignInActivity : ComponentActivity() {
     }
 }
 
+
 @Preview(showBackground = true, name = "Sign In Screen Preview", widthDp = 360, heightDp = 780)
 @Composable
 fun SignInScreenPreview() {
     SmartTravelTheme {
-        SignInScreen({}, {}, {}, {})
+        SignInScreen(
+            onNavigateBack = {},
+            onSignInWithEmail = {},
+            onSignInWithGoogle = {},
+            onSignInWithFacebook = {}
+        )
     }
 }
