@@ -205,7 +205,7 @@ fun SignInScreen(
                     Text(
                         "Sign Up",
                         style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
-                        color = colorResource(id = R.color.primary) // <-- Corrected: Use colorResource()
+                        color = colorResource(id = R.color.primary)
                     )
                 }
             }

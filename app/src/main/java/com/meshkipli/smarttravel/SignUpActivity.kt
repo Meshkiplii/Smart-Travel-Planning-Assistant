@@ -1,5 +1,6 @@
 package com.meshkipli.smarttravel
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -20,6 +21,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -30,16 +33,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.meshkipli.smarttravel.ui.theme.SmartTravelTheme // Assuming you have this
 
-// Consider moving AuthTextField to a common file if not already done
-// For brevity, I'm assuming it's available (e.g., copied from SignInActivity or a common file)
-// If not, copy AuthTextField composable here as well.
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SignUpScreen(
     onNavigateBack: () -> Unit,
     onSignUp: (email: String, pass: String) -> Unit,
-    onTermsClicked: () -> Unit
+    onTermsClicked: () -> Unit,
+    onNavigateToSignIn: () -> Unit
 ) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -85,7 +85,7 @@ fun SignUpScreen(
 
                 Text("Or continue with", color = Color.Gray, style = MaterialTheme.typography.bodyMedium) // Design shows this label multiple times
                 Spacer(modifier = Modifier.height(8.dp))
-                AuthTextField( // Make sure AuthTextField is accessible here
+                AuthTextField(
                     value = email,
                     onValueChange = { email = it },
                     placeholderText = "Enter e-mail address",
@@ -95,7 +95,7 @@ fun SignUpScreen(
 
                 Text("Or continue with", color = Color.Gray, style = MaterialTheme.typography.bodyMedium)
                 Spacer(modifier = Modifier.height(8.dp))
-                AuthTextField( // Make sure AuthTextField is accessible here
+                AuthTextField(
                     value = password,
                     onValueChange = { password = it },
                     placeholderText = "Create a password",
@@ -106,7 +106,7 @@ fun SignUpScreen(
 
                 Text("Or continue with", color = Color.Gray, style = MaterialTheme.typography.bodyMedium)
                 Spacer(modifier = Modifier.height(8.dp))
-                AuthTextField( // Make sure AuthTextField is accessible here
+                AuthTextField(
                     value = repeatPassword,
                     onValueChange = { repeatPassword = it },
                     placeholderText = "Repeat password",
@@ -164,10 +164,32 @@ fun SignUpScreen(
                     .height(56.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = orangeColor),
                 shape = RoundedCornerShape(12.dp),
-                enabled = termsAccepted // Only enable if terms are accepted
+                enabled = termsAccepted
             ) {
                 Text("Continue", fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
             }
+            Spacer(modifier = Modifier.height(16.dp))
+
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    "Don't have an account? ",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = Color.Gray
+                )
+                TextButton(onClick = onNavigateToSignIn) {
+                    Text(
+                        "Sign In",
+                        style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
+                        color = colorResource(id = R.color.primary)
+                    )
+                }
+            }
+            Spacer(modifier = Modifier.height(16.dp))
         }
     }
 }
@@ -177,17 +199,20 @@ class SignUpActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            SmartTravelTheme { // Replace with your actual theme
+            SmartTravelTheme {
+                val context = LocalContext.current
                 SignUpScreen(
-                    onNavigateBack = { finish() }, // Finishes SignUpActivity
+                    onNavigateBack = { finish() },
                     onSignUp = { email, pass ->
-                        // Handle sign up logic
                         println("Sign up with Email: $email, Pass: $pass")
-                        // Navigate to next screen (e.g. MainActivity or SignInActivity)
                     },
                     onTermsClicked = {
-                        // Handle "Terms of Service" click, e.g., open a WebView or another screen
                         println("Terms of Service clicked!")
+                    },
+                    onNavigateToSignIn = {
+                        val intent = Intent(context, SignInActivity::class.java)
+                        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                        context.startActivity(intent)
                     }
                 )
             }
@@ -199,6 +224,9 @@ class SignUpActivity : ComponentActivity() {
 @Composable
 fun SignUpScreenPreview() {
     SmartTravelTheme {
-        SignUpScreen({}, { _, _ -> }, {})
+        SignUpScreen(
+            {}, { _, _ -> }, {},
+            onNavigateToSignIn = {}
+        )
     }
 }
