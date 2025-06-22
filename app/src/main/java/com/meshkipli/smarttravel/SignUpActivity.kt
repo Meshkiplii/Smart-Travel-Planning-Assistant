@@ -155,7 +155,6 @@ fun SignUpScreen(
                     if (password == repeatPassword && termsAccepted) {
                         onSignUp(email, password)
                     } else {
-                        // Handle error: passwords don't match or terms not accepted
                         println("Sign up error: Passwords match: ${password == repeatPassword}, Terms accepted: $termsAccepted")
                     }
                 },
