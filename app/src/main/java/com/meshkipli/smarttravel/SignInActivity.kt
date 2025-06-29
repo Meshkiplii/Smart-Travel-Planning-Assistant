@@ -6,7 +6,9 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.outlined.Email
@@ -75,7 +77,20 @@ fun SignInScreen(
     var password by remember { mutableStateOf("") } // <-- Add state for password
 
     Scaffold(
-        // ... (TopAppBar setup remains the same) ...
+        topBar = {
+            TopAppBar(
+                title = {},
+                navigationIcon = {
+                    IconButton(onClick = onNavigateBack) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Back"
+                        )
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.White)
+            )
+        },
         containerColor = Color.White
     ) { paddingValues ->
         Column(
@@ -85,7 +100,9 @@ fun SignInScreen(
                 .padding(horizontal = 24.dp)
         ) {
             Column(
-                modifier = Modifier.weight(1f)
+                modifier = Modifier
+                    .weight(1f)
+                    .verticalScroll(rememberScrollState())
             ) {
                 Text(
                     "Sign in",
@@ -220,114 +237,6 @@ fun OrContinueWithDivider() {
 }
 
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun SignInScreen(
-    onNavigateBack: () -> Unit,
-    onSignInWithEmail: (email: String) -> Unit,
-    onSignInWithGoogle: () -> Unit,
-    onSignInWithFacebook: () -> Unit,
-    onNavigateToSignUp: () -> Unit
-) {
-    var email by remember { mutableStateOf("") }
-
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = {},
-                navigationIcon = {
-                    IconButton(onClick = onNavigateBack) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back"
-                        )
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.White)
-            )
-        },
-        containerColor = Color.White
-    ) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-                .padding(horizontal = 24.dp)
-                .padding(bottom = 24.dp)
-        ) {
-            Column(
-                modifier = Modifier.weight(1f)
-            ) {
-                Text(
-                    "Sign in",
-                    style = MaterialTheme.typography.headlineLarge,
-                    fontWeight = FontWeight.Bold
-                )
-                Spacer(modifier = Modifier.height(32.dp))
-                AuthTextField(
-                    value = email,
-                    onValueChange = { email = it },
-                    placeholderText = "Enter e-mail address",
-                    leadingIcon = Icons.Outlined.Email
-                )
-                Spacer(modifier = Modifier.height(32.dp))
-                OrContinueWithDivider()
-                Spacer(modifier = Modifier.height(32.dp))
-                SocialLoginButton(
-                    text = "Continue with Google",
-                    iconPainter = painterResource(id = R.drawable.ic_google_logo),
-                    backgroundColor = Color.Black,
-                    contentColor = Color.White,
-                    onClick = onSignInWithGoogle
-                )
-                Spacer(modifier = Modifier.height(16.dp))
-                SocialLoginButton(
-                    text = "Continue with Facebook",
-                    iconPainter = painterResource(id = R.drawable.ic_facebook_logo),
-                    backgroundColor = Color(0xFF3B5998),
-                    contentColor = Color.White,
-                    onClick = onSignInWithFacebook
-                )
-            }
-
-            Button(
-                onClick = { onSignInWithEmail(email) },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFF9882B)),
-                shape = RoundedCornerShape(12.dp)
-            ) {
-                Text("Continue", fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    "Don't have an account? ",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = Color.Gray
-                )
-                TextButton(onClick = onNavigateToSignUp) {
-                    Text(
-                        "Sign Up",
-                        style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
-                        color = colorResource(id = R.color.primary)
-                    )
-                }
-            }
-            Spacer(modifier = Modifier.height(16.dp))
-        }
-        }
-    }
-
-
 class SignInActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -336,7 +245,7 @@ class SignInActivity : ComponentActivity() {
                 val context = LocalContext.current
                 SignInScreen(
                     onNavigateBack = { finish() },
-                    onSignInWithEmail = { email ->
+                    onSignInWithEmail = { email, password ->
 //                        println("Sign in with email: $email")
                         val intent = Intent(this@SignInActivity, HomeActivity::class.java)
                         startActivity(intent)
