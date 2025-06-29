@@ -1,9 +1,11 @@
 package com.meshkipli.smarttravel.screens
 
 import android.annotation.SuppressLint
+import android.content.Intent
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -23,12 +25,14 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.meshkipli.smarttravel.R
+import com.meshkipli.smarttravel.TripDetailsActivity
 
 
 data class Location(
@@ -41,10 +45,20 @@ data class Location(
 
 @Composable
 fun LocationCard(location: Location, modifier: Modifier = Modifier) {
+    val context = LocalContext.current
     Card(
         modifier = modifier
             .width(180.dp)
-            .height(240.dp),
+            .height(240.dp)
+        .clickable { // Make the whole Card clickable
+        val intent = Intent(context, TripDetailsActivity::class.java).apply {
+            putExtra("location_title", location.title)
+            putExtra("location_image_res", location.imageRes)
+
+        }
+        context.startActivity(intent)
+    },
+
         shape = RoundedCornerShape(20.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
