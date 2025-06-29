@@ -1,5 +1,6 @@
 package com.meshkipli.smarttravel.screens
 
+import android.content.Intent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.ui.platform.LocalView
@@ -24,12 +25,14 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.meshkipli.smarttravel.R
+import com.meshkipli.smarttravel.ScheduleTripActivity
 
 
 // --- Reusable Components ---
@@ -120,6 +123,7 @@ fun PricingRow(
 fun TripDetailsScreen(onNavigateBack: () -> Unit) {
     // --- Edge-to-edge effect setup ---
     val view = LocalView.current
+    val context = LocalContext.current
 //    val window = (view.context as Activity).window
 //    WindowCompat.setDecorFitsSystemWindows(window, false)
 //    window.statusBarColor = Color.Transparent.toArgb()
@@ -152,7 +156,9 @@ fun TripDetailsScreen(onNavigateBack: () -> Unit) {
         )
 
         // 3. Main Scrollable Content Layer
-        Column(modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
+        Column(modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())) {
             // This spacer pushes the white sheet down, revealing the image
             Spacer(modifier = Modifier.height(380.dp))
 
@@ -200,7 +206,12 @@ fun TripDetailsScreen(onNavigateBack: () -> Unit) {
 
                 // Plan Trip Button
                 Button(
-                    onClick = { /* TODO */ },
+                    onClick = {
+                        val intent = Intent(context, ScheduleTripActivity::class.java).apply {
+
+                        }
+                        context.startActivity(intent)
+                    },
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 24.dp)
