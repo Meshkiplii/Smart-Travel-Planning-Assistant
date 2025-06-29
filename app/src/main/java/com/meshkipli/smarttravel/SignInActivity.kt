@@ -337,7 +337,10 @@ class SignInActivity : ComponentActivity() {
                 SignInScreen(
                     onNavigateBack = { finish() },
                     onSignInWithEmail = { email ->
-                        println("Sign in with email: $email")
+//                        println("Sign in with email: $email")
+                        val intent = Intent(this@SignInActivity, HomeActivity::class.java)
+                        startActivity(intent)
+                        finish()
                     },
                     onSignInWithGoogle = {
                         println("Sign in with Google")
