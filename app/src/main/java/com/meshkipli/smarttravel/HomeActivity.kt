@@ -80,7 +80,7 @@ fun MainNavigationScreen() {
         ),
         BottomNavItem(
             label = "Assistant",
-            route = NavRoutes.ITINERARY,
+            route = NavRoutes.ASSISTANT,
             selectedIcon = Icons.Filled.SupportAgent,
             unselectedIcon = Icons.Outlined.SupportAgent
         )
