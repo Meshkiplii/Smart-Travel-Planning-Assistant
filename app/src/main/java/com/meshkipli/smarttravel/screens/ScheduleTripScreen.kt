@@ -187,7 +187,7 @@ fun CalendarView(selectedRange: DateRange) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ScheduleTripScreen() {
+fun ScheduleTripScreen(onNavigateBack: () -> Unit) {
     var journeyQuery by remember { mutableStateOf("") }
     var sendToEmail by remember { mutableStateOf(true) }
     val orangeColor = Color(0xFFF9882B)
@@ -197,7 +197,7 @@ fun ScheduleTripScreen() {
             TopAppBar(
                 title = { Text("New Plan", fontWeight = FontWeight.Bold) },
                 navigationIcon = {
-                    IconButton(onClick = { /* Handle back */ }) {
+                    IconButton(onClick = onNavigateBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                     }
                 },
@@ -291,6 +291,6 @@ fun ScheduleTripScreen() {
 @Composable
 fun ScheduleTripScreenPreview() {
     MaterialTheme {
-        ScheduleTripScreen()
+        ScheduleTripScreen(onNavigateBack = {})
     }
 }
