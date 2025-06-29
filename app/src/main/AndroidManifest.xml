@@ -18,6 +18,9 @@
             android:exported="false">
         </activity>
         <activity
+            android:name=".AddItineraryActivity"
+            android:exported="false" />
+        <activity
             android:name=".OnBoardingActivity"
             android:exported="false" />
         <activity
