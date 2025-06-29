@@ -1,6 +1,5 @@
 package com.meshkipli.smarttravel.screens
 
-import android.app.Activity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.ui.platform.LocalView
@@ -23,16 +22,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.view.WindowCompat
 import com.meshkipli.smarttravel.R
 
 
@@ -121,7 +117,7 @@ fun PricingRow(
 // --- Main Trip Screen ---
 
 @Composable
-fun TripDetailsScreen() {
+fun TripDetailsScreen(onNavigateBack: () -> Unit) {
     // --- Edge-to-edge effect setup ---
     val view = LocalView.current
 //    val window = (view.context as Activity).window
@@ -221,7 +217,7 @@ fun TripDetailsScreen() {
         // 4. Floating UI Layer (On top of everything)
         // Back Arrow
         IconButton(
-            onClick = { /* Handle back */ },
+            onClick = onNavigateBack,
             modifier = Modifier
                 .align(Alignment.TopStart)
                 .statusBarsPadding()
@@ -254,7 +250,7 @@ fun TripDetailsScreen() {
 @Composable
 fun TripDetailsScreenPreview() {
     MaterialTheme {
-        TripDetailsScreen()
+        TripDetailsScreen(onNavigateBack = {})
     }
 }
 
