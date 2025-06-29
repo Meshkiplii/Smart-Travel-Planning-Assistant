@@ -228,25 +228,19 @@ fun ItineraryFormScreen() {
         TimelineEvent("21:30", "Maldives Islands", "Sea blowing", Icons.Default.Air, isPast = true)
     )
 
-    val navItems = listOf(
-        BottomNavItem("Home", Icons.Outlined.Home, false),
-        BottomNavItem("Wallet", Icons.Outlined.AccountBalanceWallet, false),
-        BottomNavItem("Guide", Icons.Filled.Explore, true),
-        BottomNavItem("Chart", Icons.Outlined.BarChart, false)
-    )
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Itinerary Form", fontWeight = FontWeight.Bold) },
-                navigationIcon = {
-                    IconButton(onClick = { /* Handle back */ }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
-                    }
-                },
+                title = { Text("Itinerary", fontWeight = FontWeight.Bold) },
+//                navigationIcon = {
+//                    IconButton(onClick = { /* Handle back */ }) {
+//                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+//                    }
+//                },
                 actions = {
                     IconButton(onClick = { /* Handle action */ }) {
-                        Icon(Icons.Outlined.CropFree, contentDescription = "Scan")
+                        Icon(Icons.Outlined.Add, contentDescription = "Add Itinerary")
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.White)
