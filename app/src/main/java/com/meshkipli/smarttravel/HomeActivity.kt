@@ -4,225 +4,109 @@ import android.annotation.SuppressLint
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.annotation.DrawableRes
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Star
-import androidx.compose.material.icons.filled.Tune
-import androidx.compose.material.icons.outlined.AccountBalanceWallet
-import androidx.compose.material.icons.outlined.BarChart
-import androidx.compose.material.icons.outlined.Explore
+import androidx.compose.material.icons.outlined.CalendarMonth
+import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
+import androidx.navigation.NavDestination.Companion.hierarchy
+import androidx.navigation.NavGraph.Companion.findStartDestination
+import androidx.navigation.NavHost
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.*
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
+import com.meshkipli.smarttravel.screens.HomeScreen // Assuming HomeScreen is in this package
+import com.meshkipli.smarttravel.screens.ItineraryFormScreen// Assuming ItineraryScreen is here
+import com.meshkipli.smarttravel.ui.BottomNavItem // Your BottomNavItem class
+import com.meshkipli.smarttravel.ui.theme.SmartTravelTheme // Your app theme
 
-// --- Placeholder for your drawable resources ---
-// In a real project, replace these with your actual resource IDs
-
-
-// --- Data Models for the Screen ---
-data class Location(
-    @DrawableRes val imageRes: Int,
-    val title: String,
-    val price: String? = null,
-    val rating: Double? = null,
-    val subtitle: String? = null
-)
-
-data class NavItem(
-    val label: String,
-    val selectedIcon: ImageVector,
-    val unselectedIcon: ImageVector,
-    val isSelected: Boolean
-)
 class HomeActivity : ComponentActivity() {
+    @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter") // Add if Scaffold complains
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            // Your theme if you have one
-            // SmartTravelTheme { // Or your app's theme
-            MaterialTheme { // Using MaterialTheme as a fallback
-                HomeScreen() // Call your composable screen content here
-            }
-            // }
-        }
-    }
-}
-// --- Reusable Components ---
-
-@Composable
-fun LocationCard(location: Location, modifier: Modifier = Modifier) {
-    Card(
-        modifier = modifier
-            .width(180.dp)
-            .height(240.dp),
-        shape = RoundedCornerShape(20.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
-    ) {
-        Box(modifier = Modifier.fillMaxSize()) {
-            // Background Image
-            Image(
-                painter = painterResource(id = location.imageRes), // Use Coil/Glide in a real app
-                contentDescription = location.title,
-                contentScale = ContentScale.Crop,
-                modifier = Modifier.fillMaxSize()
-            )
-            // Gradient scrim for text readability
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(
-                        Brush.verticalGradient(
-                            colors = listOf(Color.Transparent, Color.Black),
-                            startY = 300f,
-                            endY = 600f
-                        )
-                    )
-            )
-            // Text and Info Content
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(16.dp),
-                contentAlignment = Alignment.BottomStart
-            ) {
-                Column {
-                    Text(
-                        text = location.title,
-                        color = Color.White,
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Spacer(modifier = Modifier.height(4.dp))
-                    // Conditional content based on location type
-                    if (location.price != null && location.rating != null) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            Text(
-                                text = "from ${location.price}",
-                                color = Color.White.copy(alpha = 0.9f),
-                                fontSize = 14.sp
-                            )
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Text(
-                                    text = location.rating.toString(),
-                                    color = Color.White,
-                                    fontSize = 14.sp,
-                                    fontWeight = FontWeight.SemiBold
-                                )
-                                Icon(
-                                    imageVector = Icons.Filled.Star,
-                                    contentDescription = "Rating",
-                                    tint = Color(0xFFFFC107),
-                                    modifier = Modifier
-                                        .size(18.dp)
-                                        .padding(start = 4.dp)
-                                )
-                            }
-                        }
-                    } else if (location.subtitle != null) {
-                        Text(
-                            text = location.subtitle,
-                            color = Color.White.copy(alpha = 0.8f),
-                            fontSize = 14.sp
-                        )
-                    }
-                }
+            SmartTravelTheme { // Or your specific app theme
+                MainNavigationScreen()
             }
         }
     }
 }
 
-@Composable
-fun LocationCategoryRow(title: String, locations: List<Location>) {
-    Column(modifier = Modifier.fillMaxWidth()) {
-        Text(
-            text = title,
-            fontSize = 20.sp,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(horizontal = 20.dp)
-        )
-        Spacer(modifier = Modifier.height(16.dp))
-        LazyRow(
-            contentPadding = PaddingValues(horizontal = 20.dp),
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            items(locations) { location ->
-                LocationCard(location = location)
-            }
-        }
-    }
+// Define navigation routes
+object NavRoutes {
+    const val HOME = "home"
+    const val ITINERARY = "itinerary"
+    // Add other routes here if needed
 }
 
-
-// --- Main Screen ---
-
-@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreen() {
-    // --- Dummy Data ---
-    val popularLocations1 = listOf(
-        Location(R.drawable.img_switzerland, "Switzerland", price = "$699", rating = 4.9),
-        Location(R.drawable.img_ilulissat, "Ilulissat Ic...", price = "$726", rating = 4.8)
-    )
-    val popularLocations2 = listOf(
-        Location(R.drawable.img_western_strait, "Western Strait", subtitle = "16 locations"),
-        Location(R.drawable.img_beach_house, "Beach House", subtitle = "22 locations"),
-        Location(R.drawable.img_mountain_view, "Mountain View", subtitle = "36 locations")
-    )
+fun MainNavigationScreen() {
+    val navController = androidx.navigation.compose.rememberNavController()
+    val orangeColor = Color(0xFFF9882B) // Define your accent color
+
     val navItems = listOf(
-        NavItem("Home", Icons.Filled.Home, Icons.Filled.Home, true),
-        NavItem("Wallet", Icons.Outlined.AccountBalanceWallet, Icons.Outlined.AccountBalanceWallet, false),
-        NavItem("Guide", Icons.Outlined.Explore, Icons.Outlined.Explore, false),
-        NavItem("Chart", Icons.Outlined.BarChart, Icons.Outlined.BarChart, false)
+        BottomNavItem(
+            label = "Home",
+            route = NavRoutes.HOME,
+            selectedIcon = Icons.Filled.Home,
+            unselectedIcon = Icons.Outlined.Home
+        ),
+        BottomNavItem(
+            label = "Itinerary",
+            route = NavRoutes.ITINERARY,
+            selectedIcon = Icons.Filled.CalendarMonth,
+            unselectedIcon = Icons.Outlined.CalendarMonth
+        )
     )
-    val orangeColor = Color(0xFFF9882B)
-    var searchText by remember { mutableStateOf("") }
 
     Scaffold(
-        containerColor = Color.White,
         bottomBar = {
             NavigationBar(
                 containerColor = Color.White.copy(alpha = 0.95f),
                 tonalElevation = 8.dp
             ) {
+                val navBackStackEntry by navController.currentBackStackEntryAsState()
+                val currentDestination = navBackStackEntry?.destination
+
                 navItems.forEach { item ->
+                    val isSelected = currentDestination?.hierarchy?.any { it.route == item.route } == true
                     NavigationBarItem(
-                        selected = item.isSelected,
-                        onClick = { /* Handle navigation */ },
+                        selected = isSelected,
+                        onClick = {
+                            navController.navigate(item.route) {
+                                // Pop up to the start destination of the graph to
+                                // avoid building up a large stack of destinations
+                                // on the back stack as users select items
+                                popUpTo(navController.graph.findStartDestination().id) {
+                                    saveState = true
+                                }
+                                // Avoid multiple copies of the same destination when
+                                // reselecting the same item
+                                launchSingleTop = true
+                                // Restore state when reselecting a previously selected item
+                                restoreState = true
+                            }
+                        },
                         label = {
                             Text(
                                 text = item.label,
-                                fontWeight = if (item.isSelected) FontWeight.Bold else FontWeight.Normal
+                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
                             )
                         },
                         icon = {
                             Icon(
-                                imageVector = if (item.isSelected) item.selectedIcon else item.unselectedIcon,
+                                imageVector = if (isSelected) item.selectedIcon else item.unselectedIcon,
                                 contentDescription = item.label
                             )
                         },
@@ -231,88 +115,40 @@ fun HomeScreen() {
                             selectedTextColor = orangeColor,
                             unselectedIconColor = Color.Gray,
                             unselectedTextColor = Color.Gray,
-                            indicatorColor = Color.White // Or a very light orange
+                            indicatorColor = Color.White // Or a very light orange or transparent
                         )
                     )
                 }
             }
         }
-    ) { innerPadding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(bottom = innerPadding.calculateBottomPadding()) // Adjust for bottom bar
-                .verticalScroll(rememberScrollState())
+    ) { innerPadding -> // Content of the Scaffold
+       NavHost(
+            navController = navController,
+            startDestination = NavRoutes.HOME, // Default screen
+            modifier = Modifier.padding(innerPadding) // Apply padding from Scaffold
         ) {
-            Spacer(modifier = Modifier.height(24.dp))
-            // Header
-            Column(modifier = Modifier.padding(horizontal = 20.dp)) {
-                Text(
-                    text = "Find your next trip",
-                    color = Color.Gray,
-                    fontSize = 16.sp
-                )
-                Text(
-                    text = "Sydney Australia",
-                    fontSize = 28.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.Black
-                )
+            composable(NavRoutes.HOME) {
+                HomeScreen() // Your existing HomeScreen composable
             }
-            Spacer(modifier = Modifier.height(20.dp))
-            // Search and Filter
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 20.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                OutlinedTextField(
-                    value = searchText,
-                    onValueChange = { searchText = it },
-                    placeholder = { Text("Search...", color = Color.Gray) },
-                    leadingIcon = { Icon(Icons.Default.Search, contentDescription = "Search Icon", tint = Color.Gray) },
-                    modifier = Modifier.weight(1f),
-                    shape = RoundedCornerShape(50), // Fully rounded
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = Color(0xFFE0E0E0),
-                        unfocusedBorderColor = Color(0xFFE0E0E0),
-                        focusedContainerColor = Color(0xFFFAFAFA),
-                        unfocusedContainerColor = Color(0xFFFAFAFA),
-                    )
-                )
-                // Filter Button
-                IconButton(
-                    onClick = { /* Handle filter click */ },
-                    modifier = Modifier
-                        .size(56.dp)
-                        .clip(CircleShape)
-                        .background(orangeColor)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Tune,
-                        contentDescription = "Filter",
-                        tint = Color.White
-                    )
-                }
+            composable(NavRoutes.ITINERARY) {
+                ItineraryFormScreen() // Your new ItineraryScreen composable
             }
-            Spacer(modifier = Modifier.height(24.dp))
-            // Location Sections
-            LocationCategoryRow(title = "Popular locations", locations = popularLocations1)
-            Spacer(modifier = Modifier.height(24.dp))
-            LocationCategoryRow(title = "Popular locations", locations = popularLocations2)
-            Spacer(modifier = Modifier.height(24.dp))
+            // Add other destinations here
         }
     }
 }
 
-// --- Preview ---
-
-@Preview(showBackground = true, widthDp = 360, heightDp = 800)
+// Preview for the MainNavigationScreen (optional but helpful)
+@Preview(showBackground = true)
 @Composable
-fun HomeScreenPreview() {
-    MaterialTheme {
-        HomeScreen()
+fun DefaultPreview() {
+    SmartTravelTheme {
+        MainNavigationScreen()
     }
 }
+
+// Make sure your HomeScreen composable definition exists
+// (You likely have it already from previous steps)
+// Example:
+// @Composable
+// fun HomeScreen() { /* ... your home screen content ... */ }
