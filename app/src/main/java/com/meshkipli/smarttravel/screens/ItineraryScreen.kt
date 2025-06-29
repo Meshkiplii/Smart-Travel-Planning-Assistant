@@ -1,5 +1,6 @@
 package com.meshkipli.smarttravel.screens
 
+import android.content.Intent
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -21,11 +22,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.meshkipli.smarttravel.AddItineraryActivity
 
 // --- Data Models ---
 
@@ -217,6 +220,7 @@ fun ActivityRow(activity: ItineraryActivity) {
 @Composable
 fun ItineraryFormScreen() {
     val orangeColor = Color(0xFFF9882B)
+    val context = LocalContext.current
     var selectedTabIndex by remember { mutableStateOf(1) }
     val categories = listOf("Island", "Beach", "Resort")
     var selectedCategory by remember { mutableStateOf(categories[0]) }
@@ -239,7 +243,10 @@ fun ItineraryFormScreen() {
 //                    }
 //                },
                 actions = {
-                    IconButton(onClick = { /* Handle action */ }) {
+                    IconButton(onClick = {
+                        val intent = Intent(context, AddItineraryActivity::class.java)
+                        context.startActivity(intent)
+                    }) {
                         Icon(Icons.Outlined.Add, contentDescription = "Add Itinerary")
                     }
                 },
