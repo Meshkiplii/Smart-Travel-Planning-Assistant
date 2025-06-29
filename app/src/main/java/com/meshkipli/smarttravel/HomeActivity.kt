@@ -9,9 +9,11 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountBalanceWallet
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.SupportAgent
 import androidx.compose.material.icons.outlined.AccountBalanceWallet
 import androidx.compose.material.icons.outlined.CalendarMonth
 import androidx.compose.material.icons.outlined.Home
+import androidx.compose.material.icons.outlined.SupportAgent
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -24,6 +26,7 @@ import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.*
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
+import com.meshkipli.smarttravel.screens.AssistantScreen
 import com.meshkipli.smarttravel.screens.HomeScreen
 import com.meshkipli.smarttravel.screens.ItineraryFormScreen
 import com.meshkipli.smarttravel.screens.WalletScreen
@@ -47,6 +50,7 @@ object NavRoutes {
     const val HOME = "home"
     const val ITINERARY = "itinerary"
     const val WALLET = "wallet"
+    const val ASSISTANT = "assistant"
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -73,6 +77,12 @@ fun MainNavigationScreen() {
             route = NavRoutes.ITINERARY,
             selectedIcon = Icons.Filled.CalendarMonth,
             unselectedIcon = Icons.Outlined.CalendarMonth
+        ),
+        BottomNavItem(
+            label = "Assistant",
+            route = NavRoutes.ITINERARY,
+            selectedIcon = Icons.Filled.SupportAgent,
+            unselectedIcon = Icons.Outlined.SupportAgent
         )
 
     )
@@ -136,6 +146,9 @@ fun MainNavigationScreen() {
             }
            composable(NavRoutes.WALLET) {
                WalletScreen()
+           }
+           composable(NavRoutes.ASSISTANT) {
+               AssistantScreen()
            }
 
         }
