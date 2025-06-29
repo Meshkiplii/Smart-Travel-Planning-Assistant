@@ -237,11 +237,6 @@ fun ItineraryFormScreen() {
         topBar = {
             TopAppBar(
                 title = { Text("Itinerary", fontWeight = FontWeight.Bold) },
-//                navigationIcon = {
-//                    IconButton(onClick = { /* Handle back */ }) {
-//                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
-//                    }
-//                },
                 actions = {
                     IconButton(onClick = {
                         val intent = Intent(context, AddItineraryActivity::class.java)
@@ -253,7 +248,6 @@ fun ItineraryFormScreen() {
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.White)
             )
         },
-//        bottomBar = { AppBottomNavigation(items = navItems, orangeColor = orangeColor) },
         containerColor = Color(0xFFF9F9F9)
     ) { paddingValues ->
         Column(
@@ -395,9 +389,6 @@ fun TimelineNode(event: TimelineEvent, isLastNode: Boolean, orangeColor: Color) 
     }
 }
 
-// --- Shared Components for Preview ---
-
-data class BottomNavItem(val label: String, val icon: ImageVector, val isSelected: Boolean)
 
 
 // --- Previews ---

@@ -38,11 +38,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.meshkipli.smarttravel.R
 
-// --- Placeholder for your drawable resources ---
-// In a real project, replace these with your actual resource IDs
 
-
-// --- Data Models for the Screen ---
 data class Location(
     @DrawableRes val imageRes: Int,
     val title: String,
@@ -243,7 +239,7 @@ fun HomeScreen() {
             // Location Sections
             LocationCategoryRow(title = "Popular locations", locations = popularLocations1)
             Spacer(modifier = Modifier.height(24.dp))
-            LocationCategoryRow(title = "Popular locations", locations = popularLocations2)
+            LocationCategoryRow(title = "Destinations", locations = popularLocations2)
             Spacer(modifier = Modifier.height(24.dp))
         }
     }

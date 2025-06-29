@@ -6,8 +6,10 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountBalanceWallet
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.outlined.AccountBalanceWallet
 import androidx.compose.material.icons.outlined.CalendarMonth
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material3.*
@@ -27,6 +29,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.meshkipli.smarttravel.screens.HomeScreen // Assuming HomeScreen is in this package
 import com.meshkipli.smarttravel.screens.ItineraryFormScreen// Assuming ItineraryScreen is here
+import com.meshkipli.smarttravel.screens.WalletScreen
 import com.meshkipli.smarttravel.ui.BottomNavItem // Your BottomNavItem class
 import com.meshkipli.smarttravel.ui.theme.SmartTravelTheme // Your app theme
 
@@ -46,7 +49,7 @@ class HomeActivity : ComponentActivity() {
 object NavRoutes {
     const val HOME = "home"
     const val ITINERARY = "itinerary"
-    // Add other routes here if needed
+    const val WALLET = "wallet"
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -63,11 +66,18 @@ fun MainNavigationScreen() {
             unselectedIcon = Icons.Outlined.Home
         ),
         BottomNavItem(
+            label = "Wallet",
+            route = NavRoutes.WALLET,
+            selectedIcon = Icons.Filled.AccountBalanceWallet,
+            unselectedIcon = Icons.Outlined.AccountBalanceWallet
+        ),
+        BottomNavItem(
             label = "Itinerary",
             route = NavRoutes.ITINERARY,
             selectedIcon = Icons.Filled.CalendarMonth,
             unselectedIcon = Icons.Outlined.CalendarMonth
         )
+
     )
 
     Scaffold(
@@ -85,16 +95,10 @@ fun MainNavigationScreen() {
                         selected = isSelected,
                         onClick = {
                             navController.navigate(item.route) {
-                                // Pop up to the start destination of the graph to
-                                // avoid building up a large stack of destinations
-                                // on the back stack as users select items
                                 popUpTo(navController.graph.findStartDestination().id) {
                                     saveState = true
                                 }
-                                // Avoid multiple copies of the same destination when
-                                // reselecting the same item
                                 launchSingleTop = true
-                                // Restore state when reselecting a previously selected item
                                 restoreState = true
                             }
                         },
@@ -124,21 +128,24 @@ fun MainNavigationScreen() {
     ) { innerPadding -> // Content of the Scaffold
        NavHost(
             navController = navController,
-            startDestination = NavRoutes.HOME, // Default screen
-            modifier = Modifier.padding(innerPadding) // Apply padding from Scaffold
+            startDestination = NavRoutes.HOME,
+            modifier = Modifier.padding(innerPadding)
         ) {
             composable(NavRoutes.HOME) {
-                HomeScreen() // Your existing HomeScreen composable
+                HomeScreen()
             }
             composable(NavRoutes.ITINERARY) {
-                ItineraryFormScreen() // Your new ItineraryScreen composable
+                ItineraryFormScreen()
             }
-            // Add other destinations here
+           composable(NavRoutes.WALLET) {
+               WalletScreen()
+           }
+
         }
     }
 }
 
-// Preview for the MainNavigationScreen (optional but helpful)
+// Preview for the MainNavigationScreen
 @Preview(showBackground = true)
 @Composable
 fun DefaultPreview() {
@@ -146,9 +153,3 @@ fun DefaultPreview() {
         MainNavigationScreen()
     }
 }
-
-// Make sure your HomeScreen composable definition exists
-// (You likely have it already from previous steps)
-// Example:
-// @Composable
-// fun HomeScreen() { /* ... your home screen content ... */ }
