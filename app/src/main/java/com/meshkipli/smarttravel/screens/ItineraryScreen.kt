@@ -57,7 +57,7 @@ data class TimelineEvent(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AddItineraryScreen() {
+fun AddItineraryScreen(onNavigateBack: () -> Unit) {
     val orangeColor = Color(0xFFF9882B)
     val lightOrangeColor = Color(0xFFFDECDD)
     var selectedTabIndex by remember { mutableStateOf(0) }
@@ -78,7 +78,7 @@ fun AddItineraryScreen() {
             TopAppBar(
                 title = { Text("Add itinerary", fontWeight = FontWeight.Bold) },
                 navigationIcon = {
-                    IconButton(onClick = { /* Handle back */ }) {
+                    IconButton(onClick = onNavigateBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                     }
                 },
@@ -406,7 +406,7 @@ data class BottomNavItem(val label: String, val icon: ImageVector, val isSelecte
 @Composable
 fun AddItineraryScreenPreview() {
     MaterialTheme {
-        AddItineraryScreen()
+        AddItineraryScreen(onNavigateBack = {})
     }
 }
 

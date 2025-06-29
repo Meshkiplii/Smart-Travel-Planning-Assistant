@@ -259,7 +259,6 @@ class SignInActivity : ComponentActivity() {
                     },
                     onNavigateToSignUp = {
                         val intent = Intent(context, SignUpActivity::class.java)
-                         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
                         context.startActivity(intent)
                     }
 
