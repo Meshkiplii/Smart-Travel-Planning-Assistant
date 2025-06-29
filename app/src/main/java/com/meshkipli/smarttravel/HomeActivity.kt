@@ -39,15 +39,7 @@ import androidx.compose.ui.unit.sp
 
 // --- Placeholder for your drawable resources ---
 // In a real project, replace these with your actual resource IDs
-object R {
-    object drawable {
-        val switzerland = 0
-        val ilulissat = 0
-        val western_strait = 0
-        val beach_house = 0
-        val mountain_view = 0
-    }
-}
+
 
 // --- Data Models for the Screen ---
 data class Location(
@@ -194,13 +186,13 @@ fun LocationCategoryRow(title: String, locations: List<Location>) {
 fun HomeScreen() {
     // --- Dummy Data ---
     val popularLocations1 = listOf(
-        Location(R.drawable.switzerland, "Switzerland", price = "$699", rating = 4.9),
-        Location(R.drawable.ilulissat, "Ilulissat Ic...", price = "$726", rating = 4.8)
+        Location(R.drawable.img_switzerland, "Switzerland", price = "$699", rating = 4.9),
+        Location(R.drawable.img_ilulissat, "Ilulissat Ic...", price = "$726", rating = 4.8)
     )
     val popularLocations2 = listOf(
-        Location(R.drawable.western_strait, "Western Strait", subtitle = "16 locations"),
-        Location(R.drawable.beach_house, "Beach House", subtitle = "22 locations"),
-        Location(R.drawable.mountain_view, "Mountain View", subtitle = "36 locations")
+        Location(R.drawable.img_western_strait, "Western Strait", subtitle = "16 locations"),
+        Location(R.drawable.img_beach_house, "Beach House", subtitle = "22 locations"),
+        Location(R.drawable.img_mountain_view, "Mountain View", subtitle = "36 locations")
     )
     val navItems = listOf(
         NavItem("Home", Icons.Filled.Home, Icons.Filled.Home, true),
