@@ -236,7 +236,7 @@ fun ItineraryFormScreen() {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Itinerary", fontWeight = FontWeight.Bold) },
+                title = { Text("Guide", fontWeight = FontWeight.Bold) },
                 actions = {
                     IconButton(onClick = {
                         val intent = Intent(context, AddItineraryActivity::class.java)

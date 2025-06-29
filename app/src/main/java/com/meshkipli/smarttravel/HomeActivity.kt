@@ -8,10 +8,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountBalanceWallet
 import androidx.compose.material.icons.filled.CalendarMonth
+import androidx.compose.material.icons.filled.Explore
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.SupportAgent
 import androidx.compose.material.icons.outlined.AccountBalanceWallet
 import androidx.compose.material.icons.outlined.CalendarMonth
+import androidx.compose.material.icons.outlined.Explore
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.SupportAgent
 import androidx.compose.material3.*
@@ -73,10 +75,10 @@ fun MainNavigationScreen() {
             unselectedIcon = Icons.Outlined.AccountBalanceWallet
         ),
         BottomNavItem(
-            label = "Itinerary",
+            label = "Guide",
             route = NavRoutes.ITINERARY,
-            selectedIcon = Icons.Filled.CalendarMonth,
-            unselectedIcon = Icons.Outlined.CalendarMonth
+            selectedIcon = Icons.Filled.Explore,
+            unselectedIcon = Icons.Outlined.Explore
         ),
         BottomNavItem(
             label = "Assistant",
