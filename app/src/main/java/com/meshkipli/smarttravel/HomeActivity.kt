@@ -19,26 +19,23 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
-import androidx.navigation.NavHost
-import androidx.navigation.NavHostController
 import androidx.navigation.compose.*
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
-import com.meshkipli.smarttravel.screens.HomeScreen // Assuming HomeScreen is in this package
-import com.meshkipli.smarttravel.screens.ItineraryFormScreen// Assuming ItineraryScreen is here
+import com.meshkipli.smarttravel.screens.HomeScreen
+import com.meshkipli.smarttravel.screens.ItineraryFormScreen
 import com.meshkipli.smarttravel.screens.WalletScreen
-import com.meshkipli.smarttravel.ui.BottomNavItem // Your BottomNavItem class
-import com.meshkipli.smarttravel.ui.theme.SmartTravelTheme // Your app theme
+import com.meshkipli.smarttravel.ui.BottomNavItem
+import com.meshkipli.smarttravel.ui.theme.SmartTravelTheme
 
 class HomeActivity : ComponentActivity() {
     @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter") // Add if Scaffold complains
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            SmartTravelTheme { // Or your specific app theme
+            SmartTravelTheme {
                 MainNavigationScreen()
             }
         }
@@ -56,7 +53,7 @@ object NavRoutes {
 @Composable
 fun MainNavigationScreen() {
     val navController = androidx.navigation.compose.rememberNavController()
-    val orangeColor = Color(0xFFF9882B) // Define your accent color
+    val orangeColor = Color(0xFFF9882B)
 
     val navItems = listOf(
         BottomNavItem(
