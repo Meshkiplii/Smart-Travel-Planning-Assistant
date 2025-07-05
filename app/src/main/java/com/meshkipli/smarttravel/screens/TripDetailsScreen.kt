@@ -127,33 +127,50 @@ fun TripDetailsScreen(onNavigateBack: () -> Unit) {
 //    val window = (view.context as Activity).window
 //    WindowCompat.setDecorFitsSystemWindows(window, false)
 //    window.statusBarColor = Color.Transparent.toArgb()
-
     val orangeColor = Color(0xFFF9882B)
+    val currentTripTitle = "Nordic Cottage" // Example
 
-    Box(modifier = Modifier.fillMaxSize()) {
+    Box(modifier = Modifier.fillMaxSize()) { // Overall container
 
-        // 1. Background Image Layer
-        Image(
-            painter = painterResource(id = R.drawable.img_nordic_cottage),
-            contentDescription = "Nordic Cottage",
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(480.dp),
-            contentScale = ContentScale.Crop
-        )
-
-        // 2. Gradient Scrim Layer (for text readability)
+        // --- Layer for Image and its directly associated Text ---
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(480.dp)
-                .background(
-                    Brush.verticalGradient(
-                        colors = listOf(Color.Transparent, Color.Black.copy(alpha = 0.7f)),
-                        startY = 600f // Start gradient lower
+                .height(480.dp) // Height of the image area
+        ) {
+            // 1. Background Image
+            Image(
+                painter = painterResource(id = R.drawable.img_nordic_cottage),
+                contentDescription = "Trip Background",
+                modifier = Modifier.fillMaxSize(), // Fill this inner Box
+                contentScale = ContentScale.Crop
+            )
+
+            // 2. Gradient Scrim Layer (for text readability over the image)
+            Box(
+                modifier = Modifier
+                    .fillMaxSize() // Fill this inner Box, same size as image
+                    .background(
+                        Brush.verticalGradient(
+                            colors = listOf(Color.Transparent, Color.Black.copy(alpha = 0.7f)),
+                            startY = 300f, // Adjust gradient start to ensure text is readable
+                            endY = 480f   // Gradient ends at the bottom of the image
+                        )
                     )
-                )
-        )
+            )
+
+            // 3. Title Text (Aligned within this inner Box, relative to the Image)
+            Text(
+                text = currentTripTitle,
+                color = Color.White,
+                fontSize = 42.sp,
+                fontWeight = FontWeight.Bold,
+                lineHeight = 50.sp,
+                modifier = Modifier
+                    .align(Alignment.BottomStart) // Align to BottomStart of this inner Box
+                    .padding(start = 24.dp, bottom = 120.dp) // Small margin from image edges
+            )
+        }
 
         // 3. Main Scrollable Content Layer
         Column(modifier = Modifier
@@ -241,17 +258,6 @@ fun TripDetailsScreen(onNavigateBack: () -> Unit) {
             )
         }
 
-        // Title Text
-        Text(
-            text = "Nordic Cottage",
-            color = Color.White,
-            fontSize = 42.sp,
-            fontWeight = FontWeight.Bold,
-            lineHeight = 50.sp,
-            modifier = Modifier
-                .align(Alignment.BottomStart)
-                .padding(start = 24.dp, bottom = 220.dp) // Adjust padding to position correctly
-        )
     }
 }
 
