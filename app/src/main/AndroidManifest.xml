@@ -48,6 +48,9 @@
         <activity
             android:name=".MapActivity"
             android:exported="false" />
+        <activity
+            android:name=".TripsActivity"
+            android:exported="false" />
 
     </application>
 
