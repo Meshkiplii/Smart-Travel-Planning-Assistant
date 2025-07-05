@@ -70,38 +70,6 @@ fun WalletHeader(total: String, dailyAverage: String) {
     }
 }
 
-@Composable
-fun ExpenseChartPlaceholder() { // Renamed, as real chart data would come from viewmodel
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(200.dp)
-            .padding(horizontal = 16.dp),
-        shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFFFAFAFA)),
-        elevation = CardDefaults.cardElevation(0.dp)
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp),
-            verticalAlignment = Alignment.Bottom,
-            horizontalArrangement = Arrangement.SpaceEvenly
-        ) {
-            (1..7).forEach { _ ->
-                val barHeight = Random.nextFloat()
-                Box(
-                    modifier = Modifier
-                        .width(25.dp)
-                        .fillMaxHeight(barHeight)
-                        .clip(RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp))
-                        .background(Color.LightGray.copy(alpha = 0.5f))
-                )
-            }
-        }
-    }
-}
-
 val availableCategories = listOf( // Define your categories here
     DisplayExpenseCategory("Food", Icons.Default.LunchDining, Color(0xFF4CAF50)),
     DisplayExpenseCategory("Shopping", Icons.Default.ShoppingCart, Color(0xFF2196F3)),
@@ -229,8 +197,13 @@ fun WalletScreen(walletViewModel: WalletViewModel = viewModel()) {
                         dailyAverage = currencyFormat.format(uiState.dailyAverage)
                     )
                 }
-                item { ExpenseChartPlaceholder() } // Replace with actual chart if needed
+                item {
+                    CategoryExpenseChart(
+                        summaries = uiState.categorySummaries,
+                        modifier = Modifier.padding(top = 8.dp) // Add some top padding
+                    )
 
+                }
                 if (uiState.expenses.isEmpty()) {
                     item {
                         Text(
