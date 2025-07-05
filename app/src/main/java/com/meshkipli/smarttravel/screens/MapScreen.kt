@@ -112,7 +112,7 @@ fun LocationCard(location: LocationInfo) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MapScreen() {
+fun MapScreen(onNavigateBack: () -> Unit) {
     val orangeColor = Color(0xFFF9882B)
     var searchText by remember { mutableStateOf("") }
 
@@ -164,7 +164,7 @@ fun MapScreen() {
                 color = Color.White,
                 shadowElevation = 6.dp
             ) {
-                IconButton(onClick = { /* Handle back press */ }) {
+                IconButton(  onClick = onNavigateBack) {
                     Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                 }
             }
@@ -232,6 +232,6 @@ fun MapScreen() {
 @Composable
 fun MapScreenPreview() {
     MaterialTheme {
-        MapScreen()
+        MapScreen(onNavigateBack = {})
     }
 }
