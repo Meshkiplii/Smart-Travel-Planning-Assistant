@@ -34,6 +34,7 @@ import androidx.compose.ui.unit.sp
 import com.meshkipli.smarttravel.MapActivity
 import com.meshkipli.smarttravel.R
 import com.meshkipli.smarttravel.TripDetailsActivity
+import com.meshkipli.smarttravel.TripsActivity
 
 
 data class Location(
@@ -141,14 +142,40 @@ fun LocationCard(location: Location, modifier: Modifier = Modifier) {
 }
 
 @Composable
-fun LocationCategoryRow(title: String, locations: List<Location>) {
+fun LocationCategoryRow(
+    title: String,
+    locations: List<Location>,
+    onViewMoreClicked: (() -> Unit)? = null // Add a callback for "View More"
+) {
+    val orangeColor = Color(0xFFF9882B) // Define your orange color
+
     Column(modifier = Modifier.fillMaxWidth()) {
-        Text(
-            text = title,
-            fontSize = 20.sp,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(horizontal = 20.dp)
-        )
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 20.dp),
+            verticalAlignment = Alignment.CenterVertically, // Align items vertically
+            horizontalArrangement = Arrangement.SpaceBetween // Space title and "View More"
+        ) {
+            Text(
+                text = title,
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold,
+                // Optional: if title can be very long, prevent it from pushing "View More" too much
+                // modifier = Modifier.weight(1f),
+                // maxLines = 1,
+                // overflow = TextOverflow.Ellipsis
+            )
+            if (onViewMoreClicked != null) { // Only show if a click action is provided
+                Text(
+                    text = "View More",
+                    color = orangeColor,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    modifier = Modifier.clickable(onClick = onViewMoreClicked) // Make it clickable
+                )
+            }
+        }
         Spacer(modifier = Modifier.height(16.dp))
         LazyRow(
             contentPadding = PaddingValues(horizontal = 20.dp),
@@ -160,7 +187,6 @@ fun LocationCategoryRow(title: String, locations: List<Location>) {
         }
     }
 }
-
 
 // --- Main Screen ---
 
@@ -248,7 +274,11 @@ fun HomeScreen() {
             // Location Sections
             LocationCategoryRow(title = "Popular locations", locations = popularLocations1)
             Spacer(modifier = Modifier.height(24.dp))
-            LocationCategoryRow(title = "Destinations", locations = popularLocations2)
+            LocationCategoryRow(title = "Destinations", locations = popularLocations2 ,
+                onViewMoreClicked = {
+                    val intent = Intent(context, TripsActivity::class.java)
+                    context.startActivity(intent)
+                })
             Spacer(modifier = Modifier.height(24.dp))
         }
     }
