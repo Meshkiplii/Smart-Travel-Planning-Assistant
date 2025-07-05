@@ -117,8 +117,8 @@ fun MapScreen() {
     var searchText by remember { mutableStateOf("") }
 
     val locations = listOf(
-        LocationInfo(R.drawable.sunset_avenue, "Sunset evening avenue", "$299 / night"),
-        LocationInfo(R.drawable.forest_view, "Misty Forest Lodge", "$249 / night")
+        LocationInfo(R.drawable.img_sunset_avenue, "Sunset evening avenue", "$299 / night"),
+        LocationInfo(R.drawable.img_forest_view, "Misty Forest Lodge", "$249 / night")
     )
 
     // In a real app, these would come from a dynamic data source
@@ -131,7 +131,7 @@ fun MapScreen() {
     Box(modifier = Modifier.fillMaxSize()) {
         // 1. Background Map Layer
         Image(
-            painter = painterResource(id = R.drawable.map_background),
+            painter = painterResource(id = R.drawable.img_map_background),
             contentDescription = "Map Background",
             modifier = Modifier.fillMaxSize(),
             contentScale = ContentScale.Crop
