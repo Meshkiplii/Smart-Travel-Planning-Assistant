@@ -6,16 +6,25 @@ import androidx.lifecycle.viewModelScope
 import com.meshkipli.smarttravel.data.local.db.AppDatabase
 import com.meshkipli.smarttravel.data.local.db.entities.Expense
 import com.meshkipli.smarttravel.data.repository.ExpenseRepository
+import com.meshkipli.smarttravel.screens.DisplayExpenseCategory
+import com.meshkipli.smarttravel.screens.availableCategories
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import java.util.Calendar
 import java.util.Date
 import java.util.concurrent.TimeUnit
+import kotlin.text.lowercase
 
+data class CategoryExpenseSummary(
+    val displayCategory: DisplayExpenseCategory,
+    val totalAmount: Double,
+    val percentage: Float // Percentage of total expenses for this category
+)
 data class WalletUiState(
     val expenses: List<Expense> = emptyList(),
     val totalAmount: Double = 0.0,
     val dailyAverage: Double = 0.0,
+    val categorySummaries: List<CategoryExpenseSummary> = emptyList(),
     val isLoading: Boolean = true,
     val error: String? = null
 )
@@ -31,8 +40,7 @@ class WalletViewModel(application: Application) : AndroidViewModel(application) 
     val uiState: StateFlow<WalletUiState> = _uiState.asStateFlow()
 
     init {
-        // Now, the primary job of init is to start loading data.
-        // The repository will be initialized when loadWalletData() first accesses it.
+
         loadWalletData()
     }
     private fun loadWalletData() {
@@ -46,10 +54,12 @@ class WalletViewModel(application: Application) : AndroidViewModel(application) 
                 ) { expenses, total, firstDate ->
                     val currentTotal = total ?: 0.0
                     val dailyAvg = calculateDailyAverage(currentTotal, firstDate)
+                    val summaries = calculateCategorySummaries(expenses, currentTotal)
                     WalletUiState(
                         expenses = expenses,
                         totalAmount = currentTotal,
                         dailyAverage = dailyAvg,
+                        categorySummaries = summaries, // Populate summaries
                         isLoading = false
                     )
                 }.catch { throwable ->
@@ -72,6 +82,30 @@ class WalletViewModel(application: Application) : AndroidViewModel(application) 
             }
         }
     }
+
+    private fun calculateCategorySummaries(
+        expenses: List<Expense>,
+        overallTotal: Double
+    ): List<CategoryExpenseSummary> {
+        if (expenses.isEmpty()) return emptyList()
+
+        // Group expenses by category name (case-insensitive) and sum their amounts
+        val groupedExpenses = expenses
+            .groupBy { it.category.lowercase() } // Group by lowercase category name
+            .mapValues { entry -> entry.value.sumOf { it.amount } }
+
+        // Map these grouped sums to DisplayExpenseCategory and calculate percentages
+        return availableCategories.mapNotNull { displayCategory ->
+            val categoryTotal = groupedExpenses[displayCategory.name.lowercase()] ?: 0.0
+            if (categoryTotal > 0) { // Only include categories with expenses
+                val percentage = if (overallTotal > 0) (categoryTotal / overallTotal).toFloat() else 0f
+                CategoryExpenseSummary(displayCategory, categoryTotal, percentage)
+            } else {
+                null // Exclude categories with no expenses from the chart summary
+            }
+        }.sortedByDescending { it.totalAmount } // Optionally sort by amount
+    }
+
     private fun calculateDailyAverage(totalAmount: Double, firstExpenseDate: Date?): Double {
         if (totalAmount == 0.0 || firstExpenseDate == null) {
             return 0.0
