@@ -8,6 +8,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Star
@@ -87,33 +88,6 @@ fun getMockTrips(): List<TripLocation> {
     )
 }
 
-// --- Shared Components ---
-data class BottomNavItem(val label: String, val icon: ImageVector, val isSelected: Boolean)
-
-@Composable
-fun AppBottomNavigation(items: List<BottomNavItem>, orangeColor: Color) {
-    NavigationBar(containerColor = Color.White, tonalElevation = 8.dp) {
-        items.forEach { item ->
-            NavigationBarItem(
-                selected = item.isSelected,
-                onClick = { /* Handle navigation */ },
-                label = { Text(item.label, fontWeight = if (item.isSelected) FontWeight.Bold else FontWeight.Normal) },
-                icon = { Icon(item.icon, contentDescription = item.label) },
-                colors = NavigationBarItemDefaults.colors(
-                    selectedIconColor = orangeColor,
-                    selectedTextColor = orangeColor,
-                    unselectedIconColor = Color.Gray,
-                    unselectedTextColor = Color.Gray,
-                    indicatorColor = Color.White
-                )
-            )
-        }
-    }
-}
-
-
-// --- Trips Screen Components ---
-
 @Composable
 fun TripLocationCard(trip: TripLocation) {
     Card(
@@ -184,24 +158,29 @@ fun TripLocationCard(trip: TripLocation) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TripsScreen() {
+fun TripsScreen(onNavigateBack: () -> Unit) {
     var searchText by remember { mutableStateOf("") }
     val tripLocations = getMockTrips()
     val orangeColor = Color(0xFFF9882B)
 
-    val navItems = listOf(
-        BottomNavItem("Home", Icons.Filled.Home, true),
-        BottomNavItem("Wallet", Icons.Outlined.AccountBalanceWallet, false),
-        BottomNavItem("Guide", Icons.Outlined.Explore, false),
-        BottomNavItem("Chart", Icons.Outlined.BarChart, false)
-    )
 
     Scaffold(
         containerColor = Color(0xFFF9F9F9), // Light background for contrast
         topBar = {
             Column(modifier = Modifier.background(Color.White)) {
                 TopAppBar(
-                    title = { Text("My Trips", fontWeight = FontWeight.Bold) },
+                    title = { Text("Trips", fontWeight = FontWeight.Bold) },
+                    navigationIcon = {
+                        // Show back button only if onNavigateBack is provided
+                        if (onNavigateBack != null) {
+                            IconButton(onClick = onNavigateBack) {
+                                Icon(
+                                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                    contentDescription = "Back"
+                                )
+                            }
+                        }
+                    },
                     colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.White)
                 )
                 OutlinedTextField(
@@ -221,7 +200,7 @@ fun TripsScreen() {
                 )
             }
         },
-        bottomBar = { AppBottomNavigation(items = navItems, orangeColor = orangeColor) }
+
     ) { paddingValues ->
         LazyColumn(
             modifier = Modifier.padding(paddingValues),
@@ -242,6 +221,6 @@ fun TripsScreen() {
 @Composable
 fun TripsScreenPreview() {
     MaterialTheme {
-        TripsScreen()
+        TripsScreen(onNavigateBack = {})
     }
 }
