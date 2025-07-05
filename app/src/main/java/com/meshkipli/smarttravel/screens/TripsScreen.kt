@@ -136,12 +136,12 @@ fun TripLocationCard(trip: TripLocation) {
                         color = Color.Gray
                     )
                 }
-//                Text(
-//                    text = trip.description,
-//                    fontSize = 14.sp,
-//                    color = Color.DarkGray,
-//                    lineHeight = 20.sp
-//                )
+                Text(
+                    text = trip.description,
+                    fontSize = 14.sp,
+                    color = Color.DarkGray,
+                    lineHeight = 20.sp
+                )
                 Text(
                     text = "from $${trip.price} / night",
                     fontSize = 14.sp,
