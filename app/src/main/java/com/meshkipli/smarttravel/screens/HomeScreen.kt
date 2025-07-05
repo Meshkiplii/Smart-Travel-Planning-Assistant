@@ -31,6 +31,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.meshkipli.smarttravel.MapActivity
 import com.meshkipli.smarttravel.R
 import com.meshkipli.smarttravel.TripDetailsActivity
 
@@ -176,6 +177,7 @@ fun HomeScreen() {
         Location(R.drawable.img_beach_house, "Beach House", subtitle = "22 locations"),
         Location(R.drawable.img_mountain_view, "Mountain View", subtitle = "36 locations")
     )
+    val context = LocalContext.current
     val orangeColor = Color(0xFFF9882B)
     var searchText by remember { mutableStateOf("") }
 
@@ -228,7 +230,8 @@ fun HomeScreen() {
                 )
                 // Filter Button
                 IconButton(
-                    onClick = { /* Handle filter click */ },
+                    onClick = {  val intent = Intent(context, MapActivity::class.java)
+                        context.startActivity(intent)},
                     modifier = Modifier
                         .size(56.dp)
                         .clip(CircleShape)
