@@ -7,12 +7,10 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountBalanceWallet
-import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Explore
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.SupportAgent
 import androidx.compose.material.icons.outlined.AccountBalanceWallet
-import androidx.compose.material.icons.outlined.CalendarMonth
 import androidx.compose.material.icons.outlined.Explore
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.SupportAgent
@@ -31,7 +29,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import com.meshkipli.smarttravel.screens.AssistantScreen
 import com.meshkipli.smarttravel.screens.HomeScreen
 import com.meshkipli.smarttravel.screens.ItineraryFormScreen
-import com.meshkipli.smarttravel.screens.WalletScreen
+import com.meshkipli.smarttravel.ui.wallet.WalletScreen
 import com.meshkipli.smarttravel.ui.BottomNavItem
 import com.meshkipli.smarttravel.ui.theme.SmartTravelTheme
 

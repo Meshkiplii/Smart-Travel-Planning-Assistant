@@ -1,4 +1,4 @@
-package com.meshkipli.smarttravel.ui.wallet // Or your UI package
+package com.meshkipli.smarttravel.ui.wallet
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
@@ -6,8 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.meshkipli.smarttravel.data.local.db.AppDatabase
 import com.meshkipli.smarttravel.data.local.db.entities.Expense
 import com.meshkipli.smarttravel.data.repository.ExpenseRepository
-import com.meshkipli.smarttravel.screens.DisplayExpenseCategory
-import com.meshkipli.smarttravel.screens.availableCategories
+import com.meshkipli.smarttravel.ui.common.availableCategories
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import java.util.Calendar
@@ -15,19 +14,6 @@ import java.util.Date
 import java.util.concurrent.TimeUnit
 import kotlin.text.lowercase
 
-data class CategoryExpenseSummary(
-    val displayCategory: DisplayExpenseCategory,
-    val totalAmount: Double,
-    val percentage: Float // Percentage of total expenses for this category
-)
-data class WalletUiState(
-    val expenses: List<Expense> = emptyList(),
-    val totalAmount: Double = 0.0,
-    val dailyAverage: Double = 0.0,
-    val categorySummaries: List<CategoryExpenseSummary> = emptyList(),
-    val isLoading: Boolean = true,
-    val error: String? = null
-)
 
 class WalletViewModel(application: Application) : AndroidViewModel(application) {
 
