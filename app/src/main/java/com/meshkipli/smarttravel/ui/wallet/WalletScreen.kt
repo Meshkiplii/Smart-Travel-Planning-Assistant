@@ -120,7 +120,7 @@ fun WalletScreen(
                 item {
                     CategoryExpenseChart(
                         summaries = uiState.categorySummaries,
-                        modifier = Modifier.padding(top = 8.dp)
+                        totalTimeString = currencyFormat.format(uiState.totalAmount)
                     )
                 }
 
