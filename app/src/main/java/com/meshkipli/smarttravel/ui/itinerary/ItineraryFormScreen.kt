@@ -114,7 +114,7 @@ fun ItineraryFormScreen(
                 Icon(Icons.Filled.Add, contentDescription = "Add Itinerary Day")
             }
         },
-        containerColor = Color(0xFFF9F9F9)
+        containerColor = Color.White
     ) { paddingValues ->
         Column(
             modifier = Modifier
@@ -226,27 +226,6 @@ fun ItineraryFormScreen(
                         }
                     }
                 }
-            }
-
-            // Bottom Button (example: view specific itinerary details or navigate)
-            Button(
-                onClick = {
-                    if (days.isNotEmpty() && selectedTabIndex < days.size) {
-                        val selectedDayId = days[selectedTabIndex].id
-                        // Example: Navigate to a detailed view for this day, or an edit screen
-                        // onNavigateToDetailedView(selectedDayId)
-                        println("View specific itinerary for day ID: $selectedDayId")
-                    }
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 24.dp, vertical = 16.dp)
-                    .height(56.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = orangeColor),
-                shape = RoundedCornerShape(12.dp),
-                enabled = days.isNotEmpty() // Enable only if there are days
-            ) {
-                Text("View Specific Itinerary Day", fontWeight = FontWeight.Bold, fontSize = 16.sp)
             }
         }
     }
