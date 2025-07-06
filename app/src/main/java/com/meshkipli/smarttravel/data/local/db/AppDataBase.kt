@@ -6,14 +6,20 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import com.meshkipli.smarttravel.data.local.db.dao.ExpenseDao
+import com.meshkipli.smarttravel.data.local.db.dao.ItineraryActivityDao
+import com.meshkipli.smarttravel.data.local.db.dao.ItineraryDayDao
 import com.meshkipli.smarttravel.data.local.db.entities.Expense
+import com.meshkipli.smarttravel.data.local.db.entities.ItineraryActivity
+import com.meshkipli.smarttravel.data.local.db.entities.ItineraryDay
 import com.meshkipli.smarttravel.data.local.db.utils.DateConverter // We'll create this next
 
-@Database(entities = [Expense::class], version = 1, exportSchema = false)
+@Database(entities = [Expense::class,ItineraryDay::class, ItineraryActivity::class], version = 2, exportSchema = false)
 @TypeConverters(DateConverter::class)
 abstract class AppDatabase : RoomDatabase() {
 
     abstract fun expenseDao(): ExpenseDao
+    abstract fun itineraryDayDao(): ItineraryDayDao
+    abstract fun itineraryActivityDao(): ItineraryActivityDao
 
     companion object {
         @Volatile
