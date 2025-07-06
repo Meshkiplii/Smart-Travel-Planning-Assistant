@@ -1,6 +1,9 @@
 package com.meshkipli.smarttravel.ui.itinerary
 
+import android.app.TimePickerDialog
 import android.content.Intent
+import android.icu.util.Calendar
+import android.widget.TimePicker
 import androidx.compose.animation.core.copy
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -36,6 +39,9 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.meshkipli.smarttravel.SmartTravelApplication
 import com.meshkipli.smarttravel.data.local.db.entities.ItineraryActivity
 import com.meshkipli.smarttravel.data.local.db.entities.ItineraryDay
+import java.text.SimpleDateFormat
+import java.util.Locale
+import kotlin.text.format
 
 // --- Screen 1: Add Itinerary ---
 
@@ -354,15 +360,67 @@ fun AddEditItineraryDayDialog(
 @Composable
 fun AddEditItineraryActivityDialog(
     activityToEdit: ItineraryActivity?,
-    dayId: Long, // Needed to associate with a day
+    dayId: Long,
     onDismiss: () -> Unit,
     onSave: (activity: ItineraryActivity, time: String, name: String, emoji: String?) -> Unit
 ) {
-    var time by remember { mutableStateOf(activityToEdit?.time ?: "") }
-    var name by remember { mutableStateOf(activityToEdit?.name ?: "") }
-    var emoji by remember { mutableStateOf(activityToEdit?.emoji ?: "") } // Default emoji or empty
+    // --- Time Picker Integration ---
+    val context = LocalContext.current
+    val calendar = Calendar.getInstance()
 
-    // Simple Emoji Picker (Replace with a more robust one if needed)
+    // Initial time state: use activityToEdit's time if available, else current time
+    val initialTimeString = activityToEdit?.time
+    var selectedHour by remember { mutableIntStateOf(calendar.get(Calendar.HOUR_OF_DAY)) }
+    var selectedMinute by remember { mutableIntStateOf(calendar.get(Calendar.MINUTE)) }
+
+    LaunchedEffect(initialTimeString) {
+        if (!initialTimeString.isNullOrBlank()) {
+            try {
+                val timeFormat = SimpleDateFormat("HH:mm", Locale.getDefault()) // Assuming "HH:mm" format
+                val date = timeFormat.parse(initialTimeString)
+                if (date != null) {
+                    val cal = Calendar.getInstance().apply { time = date }
+                    selectedHour = cal.get(Calendar.HOUR_OF_DAY)
+                    selectedMinute = cal.get(Calendar.MINUTE)
+                }
+            } catch (e: Exception) {
+                // Could not parse, keep current time as default
+                println("Error parsing initial time: $e")
+            }
+        }
+    }
+
+
+    // Formatter for displaying the time
+    val timeFormatter = remember { SimpleDateFormat("HH:mm", Locale.getDefault()) } // e.g., "09:00"
+    var formattedTime by remember(selectedHour, selectedMinute) {
+        mutableStateOf(
+            timeFormatter.format(
+                Calendar.getInstance().apply {
+                    set(Calendar.HOUR_OF_DAY, selectedHour)
+                    set(Calendar.MINUTE, selectedMinute)
+                }.time
+            )
+        )
+    }
+
+    val timePickerDialog = remember {
+        TimePickerDialog(
+            context,
+            { _: TimePicker, hour: Int, minute: Int ->
+                selectedHour = hour
+                selectedMinute = minute
+                // formattedTime will update automatically
+            },
+            selectedHour,
+            selectedMinute,
+            true // true for 24-hour format, false for AM/PM
+        )
+    }
+    // --- End of Time Picker Integration ---
+
+    var name by remember { mutableStateOf(activityToEdit?.name ?: "") }
+    var emoji by remember { mutableStateOf(activityToEdit?.emoji ?: "") }
     val emojis = listOf("🎉", "✈️", "🏨", "🍽️", "🗺️", "⛰️", "🏖️", "🛍️", "🎭", "🎶", "🚗", "🚶", "🌅", "🚕", "⛵", "🪂")
     var showEmojiPicker by remember { mutableStateOf(false) }
 
@@ -371,19 +429,28 @@ fun AddEditItineraryActivityDialog(
         title = { Text(if (activityToEdit == null) "Add New Activity" else "Edit Activity") },
         text = {
             Column {
+                // Time TextField - Clickable to show TimePickerDialog
                 OutlinedTextField(
-                    value = time,
-                    onValueChange = { time = it },
-                    label = { Text("Time (e.g., 09:00)") }
+                    value = formattedTime, // Display formatted time
+                    onValueChange = { /* Not directly editable */ },
+                    label = { Text("Time") },
+                    readOnly = true,
+                    trailingIcon = {
+                        Icon(Icons.Outlined.Schedule, "Select Time")
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { timePickerDialog.show() }
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 OutlinedTextField(
                     value = name,
                     onValueChange = { name = it },
-                    label = { Text("Activity Name") }
+                    label = { Text("Activity Name") },
+                    modifier = Modifier.fillMaxWidth()
                 )
                 Spacer(modifier = Modifier.height(8.dp))
-                Row(verticalAlignment = Alignment.CenterVertically) {
+                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
                     OutlinedTextField(
                         value = emoji,
                         onValueChange = { emoji = it },
@@ -421,9 +488,9 @@ fun AddEditItineraryActivityDialog(
         },
         confirmButton = {
             Button(onClick = {
-                if (time.isNotBlank() && name.isNotBlank()) {
-                    val currentActivity = activityToEdit ?: ItineraryActivity(dayId = dayId, time = "", name = "") // Create a dummy if new
-                    onSave(currentActivity, time, name, emoji.ifBlank { null })
+                if (formattedTime.isNotBlank() && name.isNotBlank()) {
+                    val currentActivity = activityToEdit ?: ItineraryActivity(dayId = dayId, time = "", name = "")
+                    onSave(currentActivity, formattedTime, name, emoji.ifBlank { null })
                 }
             }) {
                 Text("Save")
@@ -436,7 +503,6 @@ fun AddEditItineraryActivityDialog(
         }
     )
 }
-
 // --- Previews ---
 
 @Preview(showBackground = true, name = "Add Itinerary Screen", widthDp = 360, heightDp = 800)
