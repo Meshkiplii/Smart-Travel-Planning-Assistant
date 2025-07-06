@@ -28,9 +28,10 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.meshkipli.smarttravel.screens.AssistantScreen
 import com.meshkipli.smarttravel.screens.HomeScreen
-import com.meshkipli.smarttravel.screens.ItineraryFormScreen
+import com.meshkipli.smarttravel.ui.itinerary.ItineraryFormScreen
 import com.meshkipli.smarttravel.ui.wallet.WalletScreen
 import com.meshkipli.smarttravel.ui.BottomNavItem
+import com.meshkipli.smarttravel.ui.itinerary.AddItineraryScreen
 import com.meshkipli.smarttravel.ui.theme.SmartTravelTheme
 
 class HomeActivity : ComponentActivity() {
@@ -51,6 +52,7 @@ object NavRoutes {
     const val ITINERARY = "itinerary"
     const val WALLET = "wallet"
     const val ASSISTANT = "assistant"
+    const val ADD_ITINERARY_ROUTE = "addItinerary"
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -141,14 +143,29 @@ fun MainNavigationScreen() {
             composable(NavRoutes.HOME) {
                 HomeScreen()
             }
-            composable(NavRoutes.ITINERARY) {
-                ItineraryFormScreen()
-            }
+//
            composable(NavRoutes.WALLET) {
                WalletScreen()
            }
            composable(NavRoutes.ASSISTANT) {
                AssistantScreen()
+           }
+           composable(NavRoutes.ITINERARY) {
+               ItineraryFormScreen(
+                   onNavigateToAddItinerary = {
+                       navController.navigate(NavRoutes.ADD_ITINERARY_ROUTE)
+                   }
+                   // Pass your ItineraryViewModel if ItineraryFormScreen needs it directly
+                   // or if it's scoped differently
+               )
+           }
+           composable(NavRoutes.ADD_ITINERARY_ROUTE) {
+               // Assuming AddItineraryScreen takes the ViewModel and a navigate back lambda
+               AddItineraryScreen(
+                   onNavigateBack = { navController.popBackStack() }
+                   // ViewModel for AddItineraryScreen will be created within it
+                   // using its own factory, or you can pass it if it's shared and scoped appropriately
+               )
            }
 
         }
