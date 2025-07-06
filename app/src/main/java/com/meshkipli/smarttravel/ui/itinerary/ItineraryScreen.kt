@@ -144,12 +144,7 @@ fun AddItineraryScreen(
                                     Text(day.dayLabel, fontWeight = FontWeight.Bold)
                                     Text(day.date, fontSize = 12.sp)
                                 }
-                                // IconButton(onClick = { /* TODO: Edit Day */ dayToEdit = day }) {
-                                //     Icon(Icons.Default.Edit, contentDescription = "Edit Day", Modifier.size(18.dp))
-                                // }
-                                // IconButton(onClick = { itineraryViewModel.deleteItineraryDay(day) }) {
-                                //     Icon(Icons.Default.Delete, contentDescription = "Delete Day", Modifier.size(18.dp))
-                                // }
+
                             }
                         }
                     }
@@ -416,12 +411,14 @@ fun AddEditItineraryDayDialog(
                     onValueChange = { /* Not directly editable */ },
                     label = { Text("Date") },
                     readOnly = true, // Make it not directly editable
+                    modifier = Modifier.fillMaxWidth(),
                     trailingIcon = {
-                        Icon(Icons.Filled.CalendarToday, "Select Date")
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable { datePickerDialog.show() } // Show picker on click
+                        IconButton(onClick = {
+                            datePickerDialog.show()
+                        }) {
+                            Icon(Icons.Filled.CalendarToday, "Select Date")
+                        }
+                    }
                 )
             }
         },
@@ -523,7 +520,11 @@ fun AddEditItineraryActivityDialog(
                     label = { Text("Time") },
                     readOnly = true,
                     trailingIcon = {
-                        Icon(Icons.Outlined.Schedule, "Select Time")
+                        IconButton(onClick = {
+                            timePickerDialog.show()
+                        }) {
+                            Icon(Icons.Outlined.Schedule, "Select Time")
+                        }
                     },
                     modifier = Modifier
                         .fillMaxWidth()
