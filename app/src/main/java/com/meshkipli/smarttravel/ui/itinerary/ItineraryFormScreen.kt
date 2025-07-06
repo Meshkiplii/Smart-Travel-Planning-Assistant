@@ -38,16 +38,8 @@ import com.meshkipli.smarttravel.data.local.db.dao.ItineraryDayDao
 import com.meshkipli.smarttravel.data.local.db.entities.ItineraryActivity
 import com.meshkipli.smarttravel.data.local.db.entities.ItineraryDay
 import com.meshkipli.smarttravel.data.repository.ItineraryRepository
+import com.meshkipli.smarttravel.ui.common.DisplayableTimelineEvent
 
-// Data class for Timeline display (can be adapted or replaced)
-data class DisplayableTimelineEvent(
-    val time: String,
-    val title: String,
-    val subtitle: String, // Could be derived from activity details
-    val icon: ImageVector,
-    val isPast: Boolean = false, // You might need logic to determine this
-    val originalActivity: ItineraryActivity? = null // To link back if needed
-)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
