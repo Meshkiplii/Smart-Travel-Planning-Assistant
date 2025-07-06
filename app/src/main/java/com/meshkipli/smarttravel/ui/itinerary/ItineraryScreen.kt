@@ -1,9 +1,10 @@
 package com.meshkipli.smarttravel.ui.itinerary
 
 import android.app.TimePickerDialog
-import android.content.Intent
+import android.app.DatePickerDialog
 import android.icu.util.Calendar
 import android.widget.TimePicker
+import android.widget.DatePicker
 import androidx.compose.animation.core.copy
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -194,7 +195,7 @@ fun AddItineraryScreen(
 
             // Bottom Button (Example - can be removed or repurposed)
             Button(
-                onClick = { /* Handle next step or other action */ },
+                onClick = { onNavigateBack()},
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(16.dp)
@@ -202,7 +203,7 @@ fun AddItineraryScreen(
                 colors = ButtonDefaults.buttonColors(containerColor = orangeColor),
                 shape = RoundedCornerShape(12.dp)
             ) {
-                Text("Next step", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                Text("Done", fontWeight = FontWeight.Bold, fontSize = 16.sp)
             }
         }
     }
@@ -257,6 +258,7 @@ fun ActivityRow(
     onEdit: (ItineraryActivity) -> Unit,
     onDelete: (ItineraryActivity) -> Unit
 ) {
+    var showMenu by remember { mutableStateOf(false) }
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -299,14 +301,43 @@ fun ActivityRow(
                 }
             }
         }
-        IconButton(onClick = { onEdit(activity) }) {
-            Icon(Icons.Default.Edit, contentDescription = "Edit Activity")
-        }
-        IconButton(onClick = { onDelete(activity) }) {
-            Icon(Icons.Default.Delete, contentDescription = "Delete Activity")
+        Box { // Box is used to anchor the DropdownMenu
+            IconButton(onClick = { showMenu = true }) {
+                Icon(
+                    Icons.Default.MoreVert, // Vertical three-dots icon
+                    contentDescription = "More options"
+                )
+            }
+
+            DropdownMenu(
+                expanded = showMenu,
+                onDismissRequest = { showMenu = false }
+            ) {
+                DropdownMenuItem(
+                    text = { Text("Edit") },
+                    onClick = {
+                        onEdit(activity)
+                        showMenu = false // Dismiss menu after action
+                    },
+                    leadingIcon = { // Optional: add an icon to the menu item
+                        Icon(Icons.Default.Edit, contentDescription = "Edit Activity")
+                    }
+                )
+                DropdownMenuItem(
+                    text = { Text("Delete") },
+                    onClick = {
+                        onDelete(activity)
+                        showMenu = false // Dismiss menu after action
+                    },
+                    leadingIcon = { // Optional: add an icon to the menu item
+                        Icon(Icons.Default.Delete, contentDescription = "Delete Activity")
+                    }
+                )
+            }
         }
     }
-}
+    }
+
 
 
 // --- Dialog for Adding/Editing Itinerary Day ---
@@ -318,7 +349,53 @@ fun AddEditItineraryDayDialog(
     onSave: (dayLabel: String, date: String) -> Unit
 ) {
     var dayLabel by remember { mutableStateOf(dayToEdit?.dayLabel ?: "") }
-    var date by remember { mutableStateOf(dayToEdit?.date ?: "") }
+
+    // --- Date Picker Integration ---
+    val context = LocalContext.current
+    val calendar = Calendar.getInstance()
+
+    // Initial date state: use dayToEdit's date if available, else current date
+    val initialDateString = dayToEdit?.date
+    var selectedDate by remember {
+        mutableStateOf(
+            if (!initialDateString.isNullOrBlank()) {
+                try {
+                    // Attempt to parse the existing date string
+                    SimpleDateFormat("MMMM d, yyyy", Locale.getDefault()).parse(initialDateString)?.time ?: calendar.timeInMillis
+                } catch (e: Exception) {
+                    calendar.timeInMillis // Fallback to current date if parsing fails
+                }
+            } else {
+                calendar.timeInMillis // Default to current date for new day
+            }
+        )
+    }
+
+    // Formatter for displaying the date in the TextField
+    val dateFormatter = remember { SimpleDateFormat("MMMM d, yyyy", Locale.getDefault()) }
+    var formattedDate by remember(selectedDate) {
+        mutableStateOf(dateFormatter.format(selectedDate))
+    }
+
+    val datePickerDialog = remember {
+        DatePickerDialog(
+            context,
+            { _: DatePicker, year: Int, month: Int, dayOfMonth: Int ->
+                val newCalendar = Calendar.getInstance().apply {
+                    set(year, month, dayOfMonth)
+                }
+                selectedDate = newCalendar.timeInMillis // Update the selectedDate state (as Long)
+                // formattedDate will update automatically via remember(selectedDate)
+            },
+            calendar.get(Calendar.YEAR),
+            calendar.get(Calendar.MONTH),
+            calendar.get(Calendar.DAY_OF_MONTH)
+        ).apply {
+            // Disable days before the current day
+            datePicker.minDate = Calendar.getInstance().timeInMillis // Sets minDate to today
+        }
+    }
+    // --- End of Date Picker Integration ---
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -328,20 +405,30 @@ fun AddEditItineraryDayDialog(
                 OutlinedTextField(
                     value = dayLabel,
                     onValueChange = { dayLabel = it },
-                    label = { Text("Day Label (e.g., Day 1)") }
+                    label = { Text("Day Label (e.g., Day 1)") },
+                    modifier = Modifier.fillMaxWidth()
                 )
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Date TextField - Clickable to show DatePickerDialog
                 OutlinedTextField(
-                    value = date,
-                    onValueChange = { date = it },
-                    label = { Text("Date (e.g., July 14)") }
+                    value = formattedDate, // Display the formatted date
+                    onValueChange = { /* Not directly editable */ },
+                    label = { Text("Date") },
+                    readOnly = true, // Make it not directly editable
+                    trailingIcon = {
+                        Icon(Icons.Filled.CalendarToday, "Select Date")
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { datePickerDialog.show() } // Show picker on click
                 )
             }
         },
         confirmButton = {
             Button(onClick = {
-                if (dayLabel.isNotBlank() && date.isNotBlank()) {
-                    onSave(dayLabel, date)
+                if (dayLabel.isNotBlank() && formattedDate.isNotBlank()) {
+                    onSave(dayLabel, formattedDate) // Save the formatted date string
                 }
             }) {
                 Text("Save")
@@ -455,7 +542,8 @@ fun AddEditItineraryActivityDialog(
                         value = emoji,
                         onValueChange = { emoji = it },
                         label = { Text("Emoji (Optional)") },
-                        modifier = Modifier.weight(1f)
+                        modifier = Modifier.weight(1f),
+                        readOnly = true
                     )
                     IconButton(onClick = { showEmojiPicker = true }) {
                         Icon(Icons.Outlined.SentimentSatisfiedAlt, "Pick Emoji")
