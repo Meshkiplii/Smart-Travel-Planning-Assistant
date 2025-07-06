@@ -100,7 +100,7 @@ fun AddItineraryScreen(
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.White)
             )
         },
-        containerColor = Color(0xFFF9F9F9)
+        containerColor = Color.White
     ) { paddingValues ->
         Column(
             modifier = Modifier
@@ -175,8 +175,8 @@ fun AddItineraryScreen(
                         },
                         shape = RoundedCornerShape(50),
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = lightOrangeColor,
-                            contentColor = orangeColor
+                            containerColor = orangeColor,
+                            contentColor = Color.White
                         ),
                         modifier = Modifier
                             .fillMaxWidth()
@@ -188,18 +188,6 @@ fun AddItineraryScreen(
                 }
             }
 
-            // Bottom Button (Example - can be removed or repurposed)
-            Button(
-                onClick = { onNavigateBack()},
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp)
-                    .height(56.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = orangeColor),
-                shape = RoundedCornerShape(12.dp)
-            ) {
-                Text("Done", fontWeight = FontWeight.Bold, fontSize = 16.sp)
-            }
         }
     }
 
