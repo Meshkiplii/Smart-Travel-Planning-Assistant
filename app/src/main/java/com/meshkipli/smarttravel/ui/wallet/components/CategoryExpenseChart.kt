@@ -5,7 +5,10 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.MaterialTheme
@@ -21,8 +24,10 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.Layout
+import androidx.compose.ui.layout.Measurable
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.dp
 import com.meshkipli.smarttravel.ui.common.DisplayExpenseCategory
 import com.meshkipli.smarttravel.ui.wallet.CategoryExpenseSummary
@@ -55,8 +60,11 @@ import kotlin.math.sin
 fun CategoryExpenseChart(
     summaries: List<CategoryExpenseSummary>,
     totalTimeString: String,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier.fillMaxWidth().height(340.dp)
 ) {
+
+    android.util.Log.d("CategoryExpenseChart", "Summaries received: $summaries")
+
     // Handle the case where there is no data to display
     if (summaries.isEmpty()) {
         Text(
@@ -129,42 +137,74 @@ fun CategoryExpenseChart(
                     )
                 }
             }
-        ) { measurables, constraints ->
-            // The first measurable is the Canvas, the rest are the Text labels
-            val canvasPlaceable = measurables.first().measure(constraints)
-            val labelPlaceables = measurables.drop(1).map { it.measure(constraints) }
+        ,  measurePolicy = { measurables: List<Measurable>, constraints: Constraints -> // Explicit types for clarity
+                android.util.Log.d("CategoryExpenseChart", "Layout constraints: $constraints")
 
-            layout(canvasPlaceable.width, canvasPlaceable.height) {
-                // Place the Canvas in the center
-                canvasPlaceable.placeRelative(0, 0)
+                val canvasMeasurable = measurables.firstOrNull()
+                if (canvasMeasurable == null) {
+                    // Handle case where canvas is not provided, though unlikely with your content
+                    return@Layout layout(0, 0) {} // Return a minimal MeasureResult
+                }
 
-                // Calculate positions for the labels
-                val chartRadius = canvasPlaceable.width / 2f
-                val labelRadius = chartRadius * 1.35f // Position labels outside the chart ring
-                val center = Offset(chartRadius, chartRadius)
+                // Determine the size for the square canvas
+                val availableWidth = constraints.maxWidth
+                val availableHeight = if (constraints.hasBoundedHeight) constraints.maxHeight else constraints.maxWidth
+                val size = minOf(availableWidth, availableHeight)
+                val squareConstraints = Constraints.fixed(size, size)
 
-                var currentAngle = -90.0
-                labelPlaceables.forEachIndexed { index, placeable ->
-                    val summary = summaries[index]
-                    val sweepAngle = (summary.totalAmount / totalAmount) * 360.0
-                    // Calculate the angle for the middle of the arc
-                    val midAngle = currentAngle + sweepAngle / 2.0
-                    val midAngleRad = Math.toRadians(midAngle)
+                val canvasPlaceable = canvasMeasurable.measure(squareConstraints)
+                android.util.Log.d("CategoryExpenseChart", "CanvasPlaceable size: ${canvasPlaceable.width} x ${canvasPlaceable.height}")
 
-                    // Calculate the (x, y) coordinates for the label
-                    val x = center.x + labelRadius * cos(midAngleRad).toFloat()
-                    val y = center.y + labelRadius * sin(midAngleRad).toFloat()
+                val labelPlaceables = measurables.drop(1).map { measurable ->
+                    measurable.measure(constraints) // Measure labels with original constraints
+                }
 
-                    // Adjust position to center the text on the (x, y) coordinate
-                    val textX = x - (placeable.width / 2)
-                    val textY = y - (placeable.height / 2)
+                // The layout call is the last statement and provides the MeasureResult
+                // 'this' inside this lambda is MeasureScope
+                layout(canvasPlaceable.width, canvasPlaceable.height) {
+                    // Place the Canvas in the center of the allocated space for it
+                    canvasPlaceable.placeRelative(0, 0)
 
-                    placeable.placeRelative(textX.toInt(), textY.toInt())
+                    // Calculate positions for the labels
+                    val chartRadius = canvasPlaceable.width / 2f
+                    // Adjust labelRadius to be relative to the actual chartRadius after padding in Canvas
+                    // The padding for the Canvas drawing area is Modifier.padding(48.dp)
+                    // This padding is *inside* the canvasPlaceable dimensions.
+                    // So, the actual visual radius of the drawn donut is smaller.
+                    val canvasPaddingInPx = 48.dp.toPx() // Convert dp to Px
+                    val donutOuterRadius = chartRadius - canvasPaddingInPx
+                    val labelRadius = donutOuterRadius * 1.35f // Position labels relative to the visual donut edge
 
-                    currentAngle += sweepAngle
+                    val center = Offset(
+                        x = canvasPlaceable.width / 2f,
+                        y = canvasPlaceable.height / 2f
+                    )
+
+                    var currentAngle = -90.0
+                    val totalAmountSum = summaries.sumOf { it.totalAmount }.toFloat() // Ensure this is not zero
+
+                    if (totalAmountSum > 0f) { // Avoid division by zero
+                        labelPlaceables.forEachIndexed { index, placeable ->
+                            if (index < summaries.size) { // Ensure we don't go out of bounds
+                                val summary = summaries[index]
+                                val sweepAngle = (summary.totalAmount.toFloat() / totalAmountSum) * 360.0
+                                val midAngle = currentAngle + sweepAngle / 2.0
+                                val midAngleRad = Math.toRadians(midAngle)
+
+                                val x = center.x + labelRadius * cos(midAngleRad).toFloat()
+                                val y = center.y + labelRadius * sin(midAngleRad).toFloat()
+
+                                val textX = x - (placeable.width / 2)
+                                val textY = y - (placeable.height / 2)
+
+                                placeable.placeRelative(textX.toInt(), textY.toInt())
+                                currentAngle += sweepAngle
+                            }
+                        }
+                    }
                 }
             }
-        }
+        )
     }
 }
 
