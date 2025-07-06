@@ -1,6 +1,8 @@
 package com.meshkipli.smarttravel.data.local.db.dao
 
 import androidx.room.*
+import com.meshkipli.smarttravel.data.local.db.entities.ItineraryActivity
+import com.meshkipli.smarttravel.data.local.db.entities.ItineraryDay
 import kotlinx.coroutines.flow.Flow
 
 @Dao
