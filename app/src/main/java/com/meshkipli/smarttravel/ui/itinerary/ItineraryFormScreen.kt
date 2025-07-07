@@ -1,30 +1,47 @@
 package com.meshkipli.smarttravel.ui.itinerary
 
-import android.content.Intent
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
-import androidx.compose.material.icons.outlined.Add
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flowOf
-import androidx.compose.material3.*
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Tab
+import androidx.compose.material3.TabRow
+import androidx.compose.material3.TabRowDefaults
 import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
-import androidx.compose.runtime.*
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -39,12 +56,16 @@ import com.meshkipli.smarttravel.data.local.db.entities.ItineraryActivity
 import com.meshkipli.smarttravel.data.local.db.entities.ItineraryDay
 import com.meshkipli.smarttravel.data.repository.ItineraryRepository
 import com.meshkipli.smarttravel.ui.common.DisplayableTimelineEvent
+import com.meshkipli.smarttravel.ui.itinerary.components.TimelineNode
+import com.meshkipli.smarttravel.ui.itinerary.components.emojiToIcon
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOf
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ItineraryFormScreen(
-    onNavigateToAddItinerary: () -> Unit, // <--- ADD THIS NAVIGATION LAMBDA
+    onNavigateToAddItinerary: () -> Unit,
     itineraryViewModel: ItineraryViewModel = viewModel(
         factory = ItineraryViewModelFactory(
             (LocalContext.current.applicationContext as SmartTravelApplication).itineraryRepository
@@ -52,37 +73,30 @@ fun ItineraryFormScreen(
     )
 ) {
     val orangeColor = Color(0xFFF9882B)
-    val context = LocalContext.current
-
-    // Observe days from the ViewModel
     val days by itineraryViewModel.allDays.collectAsState()
-    // Observe activities for the selected day
     val activities by itineraryViewModel.activitiesForSelectedDay.collectAsState()
 
     var selectedTabIndex by remember { mutableIntStateOf(0) }
 
-    // Categories - these can remain static or be fetched if they become dynamic
-    val categories = listOf("Island", "Beach", "Resort") // Example categories
+    val categories = listOf("Island", "Beach", "Resort")
     var selectedCategory by remember { mutableStateOf(categories.firstOrNull() ?: "") }
 
-    // Update selectedDayId in ViewModel when tab changes and days list is not empty
     LaunchedEffect(days, selectedTabIndex) {
         if (days.isNotEmpty() && selectedTabIndex < days.size) {
             itineraryViewModel.selectDay(days[selectedTabIndex].id)
         } else {
-            itineraryViewModel.selectDay(null) // Clear selection if no days or index out of bounds
+            itineraryViewModel.selectDay(null)
         }
     }
 
-    // Transform ItineraryActivities into DisplayableTimelineEvents
+
     val timelineEvents = remember(activities) {
         activities.map { activity ->
             DisplayableTimelineEvent(
                 time = activity.time,
                 title = activity.name,
-                subtitle = "Activity Details", // Replace with more meaningful subtitle if available
-                icon = emojiToIcon(activity.emoji), // Helper function to map emoji to icon
-                // isPast = determineIfPast(activity.time, days.getOrNull(selectedTabIndex)?.date) // Implement this logic
+                subtitle = "Activity Details",
+                icon = emojiToIcon(activity.emoji),
                 originalActivity = activity
             )
         }
@@ -95,7 +109,7 @@ fun ItineraryFormScreen(
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.White)
             )
         },
-        floatingActionButton = { // <--- ADD FAB HERE
+        floatingActionButton = { 
             FloatingActionButton(
                 onClick = {
                     onNavigateToAddItinerary()
@@ -114,7 +128,7 @@ fun ItineraryFormScreen(
                 .padding(paddingValues)
                 .verticalScroll(rememberScrollState())
         ) {
-            // Category Chips (can remain as is if static)
+            
             LazyRow(
                 contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -145,7 +159,7 @@ fun ItineraryFormScreen(
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .weight(1f) // Allow it to take up space if the list is empty
+                        .weight(1f) 
                         .padding(16.dp),
                     contentAlignment = Alignment.Center
                 ) {
@@ -163,9 +177,9 @@ fun ItineraryFormScreen(
                     }
                 }
             } else {
-                // Day Tabs - Populated from ViewModel
+                
                 TabRow(
-                    selectedTabIndex = selectedTabIndex.coerceIn(0, days.size -1), // Ensure index is valid
+                    selectedTabIndex = selectedTabIndex.coerceIn(0, days.size -1), 
                     containerColor = Color.Transparent,
                     contentColor = Color.Black,
                     indicator = { tabPositions ->
@@ -184,7 +198,7 @@ fun ItineraryFormScreen(
                             onClick = { selectedTabIndex = index },
                             text = {
                                 Text(
-                                    "${day.dayLabel}\n${day.date}", // Combine dayLabel and date
+                                    "${day.dayLabel}\n${day.date}", 
                                     lineHeight = 18.sp,
                                     textAlign = TextAlign.Center,
                                     fontWeight = if (selectedTabIndex == index) FontWeight.Bold else FontWeight.Normal,
@@ -196,7 +210,7 @@ fun ItineraryFormScreen(
                     }
                 }
 
-                // Timeline - Populated from ViewModel's activitiesForSelectedDay
+                
                 if (timelineEvents.isEmpty() && days.isNotEmpty()) {
                     Box(
                         modifier = Modifier
@@ -213,7 +227,7 @@ fun ItineraryFormScreen(
                                 event = event,
                                 isLastNode = index == timelineEvents.lastIndex,
                                 orangeColor = orangeColor,
-                                 onClick = { event.originalActivity?.let { activity -> /* navigate to edit */ } }
+                                 onClick = { event.originalActivity?.let { activity ->  } }
                             )
                         }
                     }
@@ -223,103 +237,16 @@ fun ItineraryFormScreen(
     }
 }
 
-// Helper function to map emoji to a Material Icon (example)
-// You'll need to expand this or use a more robust solution
-fun emojiToIcon(emoji: String?): ImageVector {
-    return when (emoji) {
-        "🎉" -> Icons.Default.Celebration
-        "✈️" -> Icons.Default.Flight
-        "🏨" -> Icons.Default.Hotel
-        "🍽️" -> Icons.Default.Restaurant
-        "🗺️" -> Icons.Default.Map
-        "⛰️" -> Icons.Default.Terrain
-        "🏖️" -> Icons.Default.BeachAccess
-        "🛍️" -> Icons.Default.ShoppingBag
-        "🎭" -> Icons.Default.TheaterComedy // Or other relevant icon
-        "🎶" -> Icons.Default.MusicNote
-        "🚗" -> Icons.Default.DirectionsCar
-        "🚶" -> Icons.Default.DirectionsWalk
-        "🌅" -> Icons.Default.WbSunny // Or a custom sunrise/sunset icon
-        "🚕" -> Icons.Default.LocalTaxi
-        "⛵" -> Icons.Default.Sailing
-        "🪂" -> Icons.Default.Paragliding
-        // Add more mappings as needed
-        else -> Icons.Default.Place // Default icon
-    }
-}
 
-
-// TimelineNode Composable (Ensure it takes DisplayableTimelineEvent or adapt it)
-@Composable
-fun TimelineNode(
-    event: DisplayableTimelineEvent, // Or your original TimelineEvent if you haven't changed it
-    isLastNode: Boolean,
-    orangeColor: Color,
-    onClick: () -> Unit // <--- ADD THIS PARAMETER
-) {
-    Row(
-        modifier = Modifier
-            .height(IntrinsicSize.Min)
-            .clickable(onClick = onClick) // <--- APPLY THE CLICKABLE MODIFIER HERE
-    ) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Box(
-                modifier = Modifier
-                    .size(24.dp)
-                    .clip(CircleShape)
-                    .background(if (event.isPast) Color.Transparent else orangeColor)
-                    .border(2.dp, if (event.isPast) Color.Gray else orangeColor, CircleShape)
-            )
-            if (!isLastNode) {
-                Divider(
-                    color = Color.Gray,
-                    modifier = Modifier
-                        .width(2.dp)
-                        .weight(1f)
-                )
-            }
-        }
-        Spacer(modifier = Modifier.width(16.dp))
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = if (isLastNode) 0.dp else 24.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(event.time, fontWeight = FontWeight.Bold, fontSize = 16.sp)
-            Spacer(modifier = Modifier.width(16.dp))
-            Column(modifier = Modifier.weight(1f)) {
-                Text(event.title, fontWeight = FontWeight.Bold, fontSize = 16.sp)
-                Text(event.subtitle, color = Color.Gray, fontSize = 14.sp)
-            }
-            Box(
-                modifier = Modifier
-                    .size(40.dp)
-                    .clip(CircleShape)
-                    .background(Color.LightGray.copy(alpha = 0.3f)),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(event.icon, contentDescription = event.title, tint = Color.Gray)
-            }
-        }
-    }
-}
-
-
-// --- Previews ---
 
 @Preview(showBackground = true, name = "Itinerary Form Screen - Empty", widthDp = 360, heightDp = 800)
 @Composable
 fun ItineraryFormScreenEmptyPreview() {
     MaterialTheme {
-        // For preview, you can pass a ViewModel that returns empty lists
-        // or mock the ViewModelProvider to return a specific instance.
-        // This is a simplified preview:
         ItineraryFormScreen(
-            onNavigateToAddItinerary = { /* Preview doesn't need real navigation */ },
+            onNavigateToAddItinerary = { },
             itineraryViewModel = viewModel(
                 factory = ItineraryViewModelFactory(
-                    // Mock repository for preview that returns empty data
                     ItineraryRepository(MockItineraryDayDaoEmpty(), MockItineraryActivityDaoEmpty())
                 )
             )
@@ -332,10 +259,10 @@ fun ItineraryFormScreenEmptyPreview() {
 fun ItineraryFormScreenWithDataPreview() {
     MaterialTheme {
         ItineraryFormScreen(
-            onNavigateToAddItinerary = { /* Preview doesn't need real navigation */ },
+            onNavigateToAddItinerary = {  },
             itineraryViewModel = viewModel(
                 factory = ItineraryViewModelFactory(
-                    // Mock repository for preview that returns empty data
+                    
                     ItineraryRepository(MockItineraryDayDaoEmpty(), MockItineraryActivityDaoEmpty())
                 )
             )
@@ -359,28 +286,3 @@ class MockItineraryActivityDaoEmpty : ItineraryActivityDao {
     override fun getActivityById(activityId: Long): Flow<ItineraryActivity?> = flowOf(null)
 }
 
-class MockItineraryDayDaoWithData :ItineraryDayDao {
-    private val sampleDays = listOf(
-        ItineraryDay(1, "Day 1", "July 14"),
-        ItineraryDay(2, "Day 2", "July 15")
-    )
-    override suspend fun insertDay(day: ItineraryDay): Long = 3L
-    override suspend fun updateDay(day: ItineraryDay) {}
-    override suspend fun deleteDay(day: ItineraryDay) {}
-    override fun getAllDays(): Flow<List<ItineraryDay>> = flowOf(sampleDays)
-    override fun getDayById(dayId: Long): Flow<ItineraryDay?> = flowOf(sampleDays.find { it.id == dayId })
-}
-class MockItineraryActivityDaoWithData : ItineraryActivityDao {
-    private val sampleActivities = listOf(
-        ItineraryActivity(1, 1, "09:00", "Breakfast", "🍽️"),
-        ItineraryActivity(2, 1, "10:30", "Beach Time", "🏖️"),
-        ItineraryActivity(3, 2, "14:00", "Museum Visit", "🗺️")
-    )
-    override suspend fun insertActivity(activity: ItineraryActivity) {}
-    override suspend fun updateActivity(activity: ItineraryActivity) {}
-    override suspend fun deleteActivity(activity: ItineraryActivity) {}
-    override fun getActivitiesForDay(dayId: Long): Flow<List<ItineraryActivity>> =
-        flowOf(sampleActivities.filter { it.dayId == dayId })
-    override fun getActivityById(activityId: Long): Flow<ItineraryActivity?> =
-        flowOf(sampleActivities.find { it.id == activityId })
-}
