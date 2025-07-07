@@ -26,11 +26,12 @@ import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.*
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
-import com.meshkipli.smarttravel.screens.AssistantScreen
+import com.meshkipli.smarttravel.ui.assistant.AssistantScreen
 import com.meshkipli.smarttravel.screens.HomeScreen
 import com.meshkipli.smarttravel.ui.itinerary.ItineraryFormScreen
 import com.meshkipli.smarttravel.ui.wallet.WalletScreen
 import com.meshkipli.smarttravel.ui.BottomNavItem
+import com.meshkipli.smarttravel.ui.assistant.AssistantRoute
 import com.meshkipli.smarttravel.ui.itinerary.AddItineraryScreen
 import com.meshkipli.smarttravel.ui.theme.SmartTravelTheme
 
@@ -148,7 +149,7 @@ fun MainNavigationScreen() {
                WalletScreen()
            }
            composable(NavRoutes.ASSISTANT) {
-               AssistantScreen()
+               AssistantRoute()
            }
            composable(NavRoutes.ITINERARY) {
                ItineraryFormScreen(
