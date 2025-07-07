@@ -1,38 +1,57 @@
 package com.meshkipli.smarttravel.ui.itinerary
 
-import android.app.TimePickerDialog
-import android.app.DatePickerDialog
-import android.icu.util.Calendar
-import android.widget.TimePicker
-import android.widget.DatePicker
-import androidx.compose.animation.core.copy
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.*
-import androidx.compose.material.icons.outlined.*
-import androidx.compose.material3.*
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.outlined.Schedule
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Tab
+import androidx.compose.material3.TabRow
+import androidx.compose.material3.TabRowDefaults
 import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
-import androidx.compose.runtime.*
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -40,11 +59,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.meshkipli.smarttravel.SmartTravelApplication
 import com.meshkipli.smarttravel.data.local.db.entities.ItineraryActivity
 import com.meshkipli.smarttravel.data.local.db.entities.ItineraryDay
-import java.text.SimpleDateFormat
-import java.util.Locale
-import kotlin.text.format
-
-// --- Screen 1: Add Itinerary ---
+import com.meshkipli.smarttravel.ui.itinerary.components.AddEditItineraryActivityDialog
+import com.meshkipli.smarttravel.ui.itinerary.components.AddEditItineraryDayDialog
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -58,28 +74,27 @@ fun AddItineraryScreen(
     )
 ) {
     val orangeColor = Color(0xFFF9882B)
-    val lightOrangeColor = Color(0xFFFDECDD)
+    Color(0xFFFDECDD)
 
-    // Observe days from the ViewModel
+    
     val days by itineraryViewModel.allDays.collectAsState()
-    // Observe activities for the selected day
+    
     val activities by itineraryViewModel.activitiesForSelectedDay.collectAsState()
 
     var selectedTabIndex by remember { mutableIntStateOf(0) }
 
-    // Update selectedDayId in ViewModel when tab changes and days list is not empty
+    
     LaunchedEffect(days, selectedTabIndex) {
         if (days.isNotEmpty() && selectedTabIndex < days.size) {
             itineraryViewModel.selectDay(days[selectedTabIndex].id)
         } else {
-            itineraryViewModel.selectDay(0L) // Or handle empty state appropriately
+            itineraryViewModel.selectDay(0L) 
         }
     }
 
-    // Dialog states for adding/editing days and activities
+    
     var showAddDayDialog by remember { mutableStateOf(false) }
     var showAddActivityDialog by remember { mutableStateOf(false) }
-    var dayToEdit by remember { mutableStateOf<ItineraryDay?>(null) }
     var activityToEdit by remember { mutableStateOf<ItineraryActivity?>(null) }
 
 
@@ -114,9 +129,9 @@ fun AddItineraryScreen(
                     Text("No itinerary days yet. Add one to get started!")
                 }
             } else {
-                // Day Tabs
+                
                 TabRow(
-                    selectedTabIndex = selectedTabIndex.coerceIn(0, days.size -1), // Ensure index is valid
+                    selectedTabIndex = selectedTabIndex.coerceIn(0, days.size -1), 
                     containerColor = Color.White,
                     indicator = { tabPositions ->
                         if (tabPositions.isNotEmpty() && selectedTabIndex < tabPositions.size) {
@@ -150,7 +165,7 @@ fun AddItineraryScreen(
                     }
                 }
 
-                // Activities List
+                
                 Column(
                     modifier = Modifier
                         .weight(1f)
@@ -166,11 +181,11 @@ fun AddItineraryScreen(
                         )
                     }
                     Spacer(modifier = Modifier.height(8.dp))
-                    // Add Activity Button
+                    
                     Button(
                         onClick = {
                             if (days.isNotEmpty() && selectedTabIndex < days.size) {
-                                showAddActivityDialog = true // Open dialog to add activity
+                                showAddActivityDialog = true 
                             }
                         },
                         shape = RoundedCornerShape(50),
@@ -181,7 +196,7 @@ fun AddItineraryScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(56.dp),
-                        enabled = days.isNotEmpty() // Only enable if there's a selected day
+                        enabled = days.isNotEmpty() 
                     ) {
                         Text("Add activity", fontWeight = FontWeight.Bold)
                     }
@@ -193,7 +208,7 @@ fun AddItineraryScreen(
 
     if (showAddDayDialog) {
         AddEditItineraryDayDialog(
-            dayToEdit = null, // Passing null for adding new day
+            dayToEdit = null, 
             onDismiss = { showAddDayDialog = false },
             onSave = { dayLabel, date ->
                 itineraryViewModel.addItineraryDay(dayLabel, date)
@@ -202,15 +217,15 @@ fun AddItineraryScreen(
         )
     }
 
-    // TODO: Implement Edit Day Dialog (when dayToEdit is not null)
+    
 
     val currentSelectedDayId = if (days.isNotEmpty() && selectedTabIndex < days.size) days[selectedTabIndex].id else null
     if (showAddActivityDialog && currentSelectedDayId != null) {
         AddEditItineraryActivityDialog(
-            activityToEdit = null, // For adding new
+            activityToEdit = null, 
             dayId = currentSelectedDayId,
             onDismiss = { showAddActivityDialog = false },
-            onSave = { _, time, name, emoji -> // dayId is handled internally or passed
+            onSave = { _, time, name, emoji -> 
                 itineraryViewModel.addItineraryActivity(currentSelectedDayId, time, name, emoji)
                 showAddActivityDialog = false
             }
@@ -220,7 +235,7 @@ fun AddItineraryScreen(
     if (activityToEdit != null) {
         AddEditItineraryActivityDialog(
             activityToEdit = activityToEdit,
-            dayId = activityToEdit!!.dayId, // Activity must have a dayId
+            dayId = activityToEdit!!.dayId, 
             onDismiss = { activityToEdit = null },
             onSave = { updatedActivity, time, name, emoji ->
                 itineraryViewModel.updateItineraryActivity(
@@ -237,7 +252,7 @@ fun AddItineraryScreen(
 }
 @Composable
 fun ActivityRow(
-    activity: ItineraryActivity, // Use your Room entity
+    activity: ItineraryActivity, 
     onEdit: (ItineraryActivity) -> Unit,
     onDelete: (ItineraryActivity) -> Unit
 ) {
@@ -246,7 +261,7 @@ fun ActivityRow(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        // Time Chip
+        
         Surface(
             shape = RoundedCornerShape(50),
             border = BorderStroke(1.dp, Color.LightGray.copy(alpha = 0.5f)),
@@ -267,7 +282,7 @@ fun ActivityRow(
             }
         }
 
-        // Description Chip
+        
         Surface(
             modifier = Modifier.weight(1f),
             shape = RoundedCornerShape(50),
@@ -284,10 +299,10 @@ fun ActivityRow(
                 }
             }
         }
-        Box { // Box is used to anchor the DropdownMenu
+        Box { 
             IconButton(onClick = { showMenu = true }) {
                 Icon(
-                    Icons.Default.MoreVert, // Vertical three-dots icon
+                    Icons.Default.MoreVert, 
                     contentDescription = "More options"
                 )
             }
@@ -300,9 +315,9 @@ fun ActivityRow(
                     text = { Text("Edit") },
                     onClick = {
                         onEdit(activity)
-                        showMenu = false // Dismiss menu after action
+                        showMenu = false 
                     },
-                    leadingIcon = { // Optional: add an icon to the menu item
+                    leadingIcon = { 
                         Icon(Icons.Default.Edit, contentDescription = "Edit Activity")
                     }
                 )
@@ -310,9 +325,9 @@ fun ActivityRow(
                     text = { Text("Delete") },
                     onClick = {
                         onDelete(activity)
-                        showMenu = false // Dismiss menu after action
+                        showMenu = false 
                     },
-                    leadingIcon = { // Optional: add an icon to the menu item
+                    leadingIcon = { 
                         Icon(Icons.Default.Delete, contentDescription = "Delete Activity")
                     }
                 )
@@ -322,265 +337,6 @@ fun ActivityRow(
     }
 
 
-
-// --- Dialog for Adding/Editing Itinerary Day ---
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun AddEditItineraryDayDialog(
-    dayToEdit: ItineraryDay?,
-    onDismiss: () -> Unit,
-    onSave: (dayLabel: String, date: String) -> Unit
-) {
-    var dayLabel by remember { mutableStateOf(dayToEdit?.dayLabel ?: "") }
-
-    // --- Date Picker Integration ---
-    val context = LocalContext.current
-    val calendar = Calendar.getInstance()
-
-    // Initial date state: use dayToEdit's date if available, else current date
-    val initialDateString = dayToEdit?.date
-    var selectedDate by remember {
-        mutableStateOf(
-            if (!initialDateString.isNullOrBlank()) {
-                try {
-                    // Attempt to parse the existing date string
-                    SimpleDateFormat("MMMM d, yyyy", Locale.getDefault()).parse(initialDateString)?.time ?: calendar.timeInMillis
-                } catch (e: Exception) {
-                    calendar.timeInMillis // Fallback to current date if parsing fails
-                }
-            } else {
-                calendar.timeInMillis // Default to current date for new day
-            }
-        )
-    }
-
-    // Formatter for displaying the date in the TextField
-    val dateFormatter = remember { SimpleDateFormat("MMMM d, yyyy", Locale.getDefault()) }
-    var formattedDate by remember(selectedDate) {
-        mutableStateOf(dateFormatter.format(selectedDate))
-    }
-
-    val datePickerDialog = remember {
-        DatePickerDialog(
-            context,
-            { _: DatePicker, year: Int, month: Int, dayOfMonth: Int ->
-                val newCalendar = Calendar.getInstance().apply {
-                    set(year, month, dayOfMonth)
-                }
-                selectedDate = newCalendar.timeInMillis // Update the selectedDate state (as Long)
-                // formattedDate will update automatically via remember(selectedDate)
-            },
-            calendar.get(Calendar.YEAR),
-            calendar.get(Calendar.MONTH),
-            calendar.get(Calendar.DAY_OF_MONTH)
-        ).apply {
-            // Disable days before the current day
-            datePicker.minDate = Calendar.getInstance().timeInMillis // Sets minDate to today
-        }
-    }
-    // --- End of Date Picker Integration ---
-
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(if (dayToEdit == null) "Add New Day" else "Edit Day") },
-        text = {
-            Column {
-                OutlinedTextField(
-                    value = dayLabel,
-                    onValueChange = { dayLabel = it },
-                    label = { Text("Day Label (e.g., Day 1)") },
-                    modifier = Modifier.fillMaxWidth()
-                )
-                Spacer(modifier = Modifier.height(16.dp))
-
-                // Date TextField - Clickable to show DatePickerDialog
-                OutlinedTextField(
-                    value = formattedDate, // Display the formatted date
-                    onValueChange = { /* Not directly editable */ },
-                    label = { Text("Date") },
-                    readOnly = true, // Make it not directly editable
-                    modifier = Modifier.fillMaxWidth(),
-                    trailingIcon = {
-                        IconButton(onClick = {
-                            datePickerDialog.show()
-                        }) {
-                            Icon(Icons.Filled.CalendarToday, "Select Date")
-                        }
-                    }
-                )
-            }
-        },
-        confirmButton = {
-            Button(onClick = {
-                if (dayLabel.isNotBlank() && formattedDate.isNotBlank()) {
-                    onSave(dayLabel, formattedDate) // Save the formatted date string
-                }
-            }) {
-                Text("Save")
-            }
-        },
-        dismissButton = {
-            Button(onClick = onDismiss) {
-                Text("Cancel")
-            }
-        }
-    )
-}
-
-// --- Dialog for Adding/Editing Itinerary Activity ---
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun AddEditItineraryActivityDialog(
-    activityToEdit: ItineraryActivity?,
-    dayId: Long,
-    onDismiss: () -> Unit,
-    onSave: (activity: ItineraryActivity, time: String, name: String, emoji: String?) -> Unit
-) {
-    // --- Time Picker Integration ---
-    val context = LocalContext.current
-    val calendar = Calendar.getInstance()
-
-    // Initial time state: use activityToEdit's time if available, else current time
-    val initialTimeString = activityToEdit?.time
-    var selectedHour by remember { mutableIntStateOf(calendar.get(Calendar.HOUR_OF_DAY)) }
-    var selectedMinute by remember { mutableIntStateOf(calendar.get(Calendar.MINUTE)) }
-
-    LaunchedEffect(initialTimeString) {
-        if (!initialTimeString.isNullOrBlank()) {
-            try {
-                val timeFormat = SimpleDateFormat("HH:mm", Locale.getDefault()) // Assuming "HH:mm" format
-                val date = timeFormat.parse(initialTimeString)
-                if (date != null) {
-                    val cal = Calendar.getInstance().apply { time = date }
-                    selectedHour = cal.get(Calendar.HOUR_OF_DAY)
-                    selectedMinute = cal.get(Calendar.MINUTE)
-                }
-            } catch (e: Exception) {
-                // Could not parse, keep current time as default
-                println("Error parsing initial time: $e")
-            }
-        }
-    }
-
-
-    // Formatter for displaying the time
-    val timeFormatter = remember { SimpleDateFormat("HH:mm", Locale.getDefault()) } // e.g., "09:00"
-    var formattedTime by remember(selectedHour, selectedMinute) {
-        mutableStateOf(
-            timeFormatter.format(
-                Calendar.getInstance().apply {
-                    set(Calendar.HOUR_OF_DAY, selectedHour)
-                    set(Calendar.MINUTE, selectedMinute)
-                }.time
-            )
-        )
-    }
-
-    val timePickerDialog = remember {
-        TimePickerDialog(
-            context,
-            { _: TimePicker, hour: Int, minute: Int ->
-                selectedHour = hour
-                selectedMinute = minute
-                // formattedTime will update automatically
-            },
-            selectedHour,
-            selectedMinute,
-            true // true for 24-hour format, false for AM/PM
-        )
-    }
-    // --- End of Time Picker Integration ---
-
-    var name by remember { mutableStateOf(activityToEdit?.name ?: "") }
-    var emoji by remember { mutableStateOf(activityToEdit?.emoji ?: "") }
-    val emojis = listOf("🎉", "✈️", "🏨", "🍽️", "🗺️", "⛰️", "🏖️", "🛍️", "🎭", "🎶", "🚗", "🚶", "🌅", "🚕", "⛵", "🪂")
-    var showEmojiPicker by remember { mutableStateOf(false) }
-
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(if (activityToEdit == null) "Add New Activity" else "Edit Activity") },
-        text = {
-            Column {
-                // Time TextField - Clickable to show TimePickerDialog
-                OutlinedTextField(
-                    value = formattedTime, // Display formatted time
-                    onValueChange = { /* Not directly editable */ },
-                    label = { Text("Time") },
-                    readOnly = true,
-                    trailingIcon = {
-                        IconButton(onClick = {
-                            timePickerDialog.show()
-                        }) {
-                            Icon(Icons.Outlined.Schedule, "Select Time")
-                        }
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable { timePickerDialog.show() }
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                OutlinedTextField(
-                    value = name,
-                    onValueChange = { name = it },
-                    label = { Text("Activity Name") },
-                    modifier = Modifier.fillMaxWidth()
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
-                    OutlinedTextField(
-                        value = emoji,
-                        onValueChange = { emoji = it },
-                        label = { Text("Emoji (Optional)") },
-                        modifier = Modifier.weight(1f),
-                        readOnly = true
-                    )
-                    IconButton(onClick = { showEmojiPicker = true }) {
-                        Icon(Icons.Outlined.SentimentSatisfiedAlt, "Pick Emoji")
-                    }
-                }
-
-                if (showEmojiPicker) {
-                    AlertDialog(
-                        onDismissRequest = { showEmojiPicker = false },
-                        title = { Text("Select Emoji") },
-                        text = {
-                            LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                items(count = emojis.size) { index ->
-                                    val selected = emojis[index]
-                                    TextButton(onClick = {
-                                        emoji = selected
-                                        showEmojiPicker = false
-                                    }) {
-                                        Text(selected, fontSize = 24.sp)
-                                    }
-                                }
-                            }
-                        },
-                        confirmButton = {
-                            TextButton(onClick = { showEmojiPicker = false }) { Text("Close") }
-                        }
-                    )
-                }
-            }
-        },
-        confirmButton = {
-            Button(onClick = {
-                if (formattedTime.isNotBlank() && name.isNotBlank()) {
-                    val currentActivity = activityToEdit ?: ItineraryActivity(dayId = dayId, time = "", name = "")
-                    onSave(currentActivity, formattedTime, name, emoji.ifBlank { null })
-                }
-            }) {
-                Text("Save")
-            }
-        },
-        dismissButton = {
-            Button(onClick = onDismiss) {
-                Text("Cancel")
-            }
-        }
-    )
-}
-// --- Previews ---
 
 @Preview(showBackground = true, name = "Add Itinerary Screen", widthDp = 360, heightDp = 800)
 @Composable
