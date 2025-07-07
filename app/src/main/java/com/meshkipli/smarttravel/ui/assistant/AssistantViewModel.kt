@@ -4,8 +4,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.ai.client.generativeai.GenerativeModel
 import com.google.ai.client.generativeai.type.Content
+import com.google.ai.client.generativeai.type.GenerateContentResponse
 import com.google.ai.client.generativeai.type.content
-import com.meshkipli.smarttravel.BuildConfig // Import your BuildConfig
+import com.meshkipli.smarttravel.BuildConfig
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -36,7 +37,7 @@ class AssistantViewModel : ViewModel() {
     val uiState: StateFlow<AssistantUiState> = _uiState.asStateFlow()
 
     private lateinit var generativeModel: GenerativeModel
-    // Define the system prompt
+
     private val systemPromptText = """
         You are "SmartTravel AI", a highly knowledgeable and enthusiastic virtual tour agent.
         Your primary goal is to assist users in planning their perfect travel experiences.
@@ -63,31 +64,99 @@ class AssistantViewModel : ViewModel() {
         - Do not go off-topic from travel planning unless the user explicitly steers the conversation.
         - Do not use offensive language or engage in harmful discussions.
 
-        Start by greeting the user and asking how you can help them plan their next adventure.
-    """.trimIndent()
+        When the conversation starts, provide a friendly greeting and ask how you can help plan their next adventure.
+    """.trimIndent() // Modified the last line to be more direct for an initial message
 
     private val systemInstructionContent: Content = content(role = "system") { text(systemPromptText) }
 
     init {
-        try {
-            // For text-only input, use the gemini-pro model
-            generativeModel = GenerativeModel(
-                modelName = "gemini-1.5-flash-latest", // Or another suitable model
-                apiKey = BuildConfig.GEMINI_API_KEY, // Use the key from BuildConfig
-                systemInstruction = systemInstructionContent
-                // You can add safetySettings and generationConfig here if needed
-            )
-        } catch (e: Exception) {
+        val apiKey = BuildConfig.GEMINI_API_KEY
+        if (apiKey.isNullOrEmpty()) {
             _uiState.update {
                 it.copy(
                     messages = it.messages + ChatMessage(
                         author = Author.ERROR,
-                        content = "Error initializing AI model: ${e.localizedMessage}"
-                    )
+                        content = "API Key is missing. Please check your configuration."
+                    ),
+                    AwaitingResponse = false // Not awaiting if there's a config error
                 )
+            }
+        } else {
+            try {
+                generativeModel = GenerativeModel(
+                    modelName = "gemini-1.5-flash-latest",
+                    apiKey = apiKey,
+                    systemInstruction = systemInstructionContent
+                )
+                // Trigger the initial greeting from the AI
+                fetchInitialGreeting()
+            } catch (e: Exception) {
+                _uiState.update {
+                    it.copy(
+                        messages = it.messages + ChatMessage(
+                            author = Author.ERROR,
+                            content = "Error initializing AI model: ${e.localizedMessage}."
+                        ),
+                        AwaitingResponse = false
+                    )
+                }
             }
         }
     }
+
+    private fun fetchInitialGreeting() {
+        if (!::generativeModel.isInitialized) return
+
+        // Add a temporary loading message for the initial greeting
+        val loadingMessageId = UUID.randomUUID().toString()
+        val loadingGreetingMessage = ChatMessage(
+            id = loadingMessageId,
+            author = Author.ASSISTANT,
+            content = "", // Empty content while loading
+            isLoading = true
+        )
+        _uiState.update {
+            it.copy(
+                messages = listOf(loadingGreetingMessage), // Start with only the loading message
+                AwaitingResponse = true
+            )
+        }
+
+        viewModelScope.launch {
+            try {
+                // For a truly fresh start based *only* on the system prompt, send empty history
+                // or a minimal user prompt to kickstart the conversation.
+                // The systemInstruction is already part of the model's configuration.
+                val chat = generativeModel.startChat(history = emptyList())
+                // Sending a very simple, almost placeholder message from the "user"
+                // can encourage the model to respond according to its system instructions.
+                // Or, for some models, generateContent might be better if you don't want a "user" turn.
+                val response: GenerateContentResponse = chat.sendMessage("Hello") // or even an empty string if allowed ""
+
+                // Remove loading message and add actual greeting
+                _uiState.update { currentState ->
+                    val greetingMessage = response.text?.let { greeting ->
+                        ChatMessage(author = Author.ASSISTANT, content = greeting)
+                    } ?: ChatMessage(author = Author.ERROR, content = "Assistant did not provide an initial greeting.")
+
+                    currentState.copy(
+                        messages = listOf(greetingMessage), // Replace loading with the actual greeting
+                        AwaitingResponse = false
+                    )
+                }
+
+            } catch (e: Exception) {
+                _uiState.update { currentState ->
+                    val errorMessage = ChatMessage(author = Author.ERROR, content = "Error fetching initial greeting: ${e.localizedMessage}")
+                    currentState.copy(
+                        messages = listOf(errorMessage), // Replace loading with error
+                        AwaitingResponse = false
+                    )
+                }
+            }
+        }
+    }
+
 
     fun sendMessage(userInput: String) {
         if (!::generativeModel.isInitialized) {
@@ -102,21 +171,22 @@ class AssistantViewModel : ViewModel() {
             return
         }
 
-        // Add user message to UI
         val userMessage = ChatMessage(author = Author.USER, content = userInput)
+        // Ensure initial greeting (if it was loading) is replaced or history is clean before adding new user message
+        val messagesWithoutInitialLoading = _uiState.value.messages.filter { !it.isLoading }
+
         _uiState.update {
             it.copy(
-                messages = it.messages + userMessage,
+                messages = messagesWithoutInitialLoading + userMessage,
                 AwaitingResponse = true
             )
         }
 
-        // Add a temporary loading message for the assistant
         val loadingMessageId = UUID.randomUUID().toString()
         val loadingAssistantMessage = ChatMessage(
             id = loadingMessageId,
             author = Author.ASSISTANT,
-            content = "", // Empty content while loading
+            content = "",
             isLoading = true
         )
         _uiState.update {
@@ -125,30 +195,19 @@ class AssistantViewModel : ViewModel() {
 
         viewModelScope.launch {
             try {
-                // History should now implicitly include the systemInstruction if set during model initialization
-                // Or, explicitly pass it if systemInstruction wasn't used in GenerativeModel constructor:
-                val currentMessages = _uiState.value.messages
-                    .filter { !it.isLoading && it.author != Author.ERROR }
-                    .map {
-                        content(role = if (it.author == Author.USER) "user" else "model") { text(it.content) }
+                val chatHistory = _uiState.value.messages
+                    .filter { !it.isLoading && it.author != Author.ERROR } // Exclude current loading & errors
+                    .dropLast(1) // Drop the current user message being sent, it's the `userInput`
+                    .map { message ->
+                        content(role = if (message.author == Author.USER) "user" else "model") { text(message.content) }
                     }
-                    .dropLast(1) // Drop the current user message being sent
 
-                // Option A: If systemInstruction was set in GenerativeModel constructor, this is usually enough.
-                val chat = generativeModel.startChat(history = currentMessages)
-
-                // Option B: If systemInstruction was NOT set in GenerativeModel constructor,
-                // and you need to ensure it's the first message in every new chat session from this VM.
-                // val chatHistory = mutableListOf(systemInstructionContent) // Or systemMessageForHistory
-                // chatHistory.addAll(currentMessages)
-                // val chat = generativeModel.startChat(history = chatHistory)
-
-
+                val chat = generativeModel.startChat(history = chatHistory)
                 val response = chat.sendMessage(userInput)
 
                 _uiState.update { currentState ->
                     val updatedMessages = currentState.messages.mapNotNull { msg ->
-                        if (msg.id == loadingMessageId) null
+                        if (msg.id == loadingMessageId) null // Remove assistant's loading message
                         else msg
                     }.toMutableList()
 
