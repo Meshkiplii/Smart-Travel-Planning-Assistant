@@ -1,4 +1,4 @@
-package com.meshkipli.smarttravel.ui.assistant // Or your ViewModel package
+package com.meshkipli.smarttravel.ui.assistant 
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -14,16 +14,16 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.util.UUID
 
-// Data models (can remain in AssistantScreen.kt or be moved here/to a separate file)
+
 enum class Author {
     USER, ASSISTANT, ERROR
 }
 
 data class ChatMessage(
-    val id: String = UUID.randomUUID().toString(), // Add unique ID for stable LazyColumn
+    val id: String = UUID.randomUUID().toString(), 
     val author: Author,
     val content: String,
-    val isLoading: Boolean = false // To show a loading indicator for assistant messages
+    val isLoading: Boolean = false 
 )
 
 data class AssistantUiState(
@@ -65,7 +65,7 @@ class AssistantViewModel : ViewModel() {
         - Do not use offensive language or engage in harmful discussions.
 
         When the conversation starts, provide a friendly greeting and ask how you can help plan their next adventure.
-    """.trimIndent() // Modified the last line to be more direct for an initial message
+    """.trimIndent() 
 
     private val systemInstructionContent: Content = content(role = "system") { text(systemPromptText) }
 
@@ -78,7 +78,7 @@ class AssistantViewModel : ViewModel() {
                         author = Author.ERROR,
                         content = "API Key is missing. Please check your configuration."
                     ),
-                    AwaitingResponse = false // Not awaiting if there's a config error
+                    AwaitingResponse = false 
                 )
             }
         } else {
@@ -88,7 +88,7 @@ class AssistantViewModel : ViewModel() {
                     apiKey = apiKey,
                     systemInstruction = systemInstructionContent
                 )
-                // Trigger the initial greeting from the AI
+                
                 fetchInitialGreeting()
             } catch (e: Exception) {
                 _uiState.update {
@@ -107,40 +107,40 @@ class AssistantViewModel : ViewModel() {
     private fun fetchInitialGreeting() {
         if (!::generativeModel.isInitialized) return
 
-        // Add a temporary loading message for the initial greeting
+        
         val loadingMessageId = UUID.randomUUID().toString()
         val loadingGreetingMessage = ChatMessage(
             id = loadingMessageId,
             author = Author.ASSISTANT,
-            content = "", // Empty content while loading
+            content = "", 
             isLoading = true
         )
         _uiState.update {
             it.copy(
-                messages = listOf(loadingGreetingMessage), // Start with only the loading message
+                messages = listOf(loadingGreetingMessage), 
                 AwaitingResponse = true
             )
         }
 
         viewModelScope.launch {
             try {
-                // For a truly fresh start based *only* on the system prompt, send empty history
-                // or a minimal user prompt to kickstart the conversation.
-                // The systemInstruction is already part of the model's configuration.
+                
+                
+                
                 val chat = generativeModel.startChat(history = emptyList())
-                // Sending a very simple, almost placeholder message from the "user"
-                // can encourage the model to respond according to its system instructions.
-                // Or, for some models, generateContent might be better if you don't want a "user" turn.
-                val response: GenerateContentResponse = chat.sendMessage("Hello") // or even an empty string if allowed ""
+                
+                
+                
+                val response: GenerateContentResponse = chat.sendMessage("Hello") 
 
-                // Remove loading message and add actual greeting
+                
                 _uiState.update { currentState ->
                     val greetingMessage = response.text?.let { greeting ->
                         ChatMessage(author = Author.ASSISTANT, content = greeting)
                     } ?: ChatMessage(author = Author.ERROR, content = "Assistant did not provide an initial greeting.")
 
                     currentState.copy(
-                        messages = listOf(greetingMessage), // Replace loading with the actual greeting
+                        messages = listOf(greetingMessage), 
                         AwaitingResponse = false
                     )
                 }
@@ -149,7 +149,7 @@ class AssistantViewModel : ViewModel() {
                 _uiState.update { currentState ->
                     val errorMessage = ChatMessage(author = Author.ERROR, content = "Error fetching initial greeting: ${e.localizedMessage}")
                     currentState.copy(
-                        messages = listOf(errorMessage), // Replace loading with error
+                        messages = listOf(errorMessage), 
                         AwaitingResponse = false
                     )
                 }
@@ -172,7 +172,7 @@ class AssistantViewModel : ViewModel() {
         }
 
         val userMessage = ChatMessage(author = Author.USER, content = userInput)
-        // Ensure initial greeting (if it was loading) is replaced or history is clean before adding new user message
+        
         val messagesWithoutInitialLoading = _uiState.value.messages.filter { !it.isLoading }
 
         _uiState.update {
@@ -196,8 +196,8 @@ class AssistantViewModel : ViewModel() {
         viewModelScope.launch {
             try {
                 val chatHistory = _uiState.value.messages
-                    .filter { !it.isLoading && it.author != Author.ERROR } // Exclude current loading & errors
-                    .dropLast(1) // Drop the current user message being sent, it's the `userInput`
+                    .filter { !it.isLoading && it.author != Author.ERROR } 
+                    .dropLast(1) 
                     .map { message ->
                         content(role = if (message.author == Author.USER) "user" else "model") { text(message.content) }
                     }
@@ -207,7 +207,7 @@ class AssistantViewModel : ViewModel() {
 
                 _uiState.update { currentState ->
                     val updatedMessages = currentState.messages.mapNotNull { msg ->
-                        if (msg.id == loadingMessageId) null // Remove assistant's loading message
+                        if (msg.id == loadingMessageId) null 
                         else msg
                     }.toMutableList()
 
