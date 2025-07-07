@@ -1,4 +1,4 @@
-package com.meshkipli.smarttravel.ui.itinerary // Correct package
+package com.meshkipli.smarttravel.ui.itinerary 
 
 import androidx.lifecycle.*
 import com.meshkipli.smarttravel.data.local.db.entities.ItineraryActivity
@@ -16,18 +16,18 @@ class ItineraryViewModel(private val repository: ItineraryRepository) : ViewMode
             initialValue = emptyList()
         )
 
-    // Keep track of the currently selected day's ID
+    
     private val _selectedDayId = MutableStateFlow<Long?>(null)
     val selectedDayId: StateFlow<Long?> = _selectedDayId.asStateFlow()
 
-    // Observe activities for the selected day
-    @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class) // For flatMapLatest
+    
+    @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class) 
     val activitiesForSelectedDay: StateFlow<List<ItineraryActivity>> =
         _selectedDayId.flatMapLatest { dayId ->
-            if (dayId != null && dayId != 0L) { // Ensure dayId is valid
+            if (dayId != null && dayId != 0L) { 
                 repository.getActivitiesForDay(dayId)
             } else {
-                flowOf(emptyList()) // Return empty list if no day is selected or ID is invalid
+                flowOf(emptyList()) 
             }
         }.stateIn(
             scope = viewModelScope,
@@ -36,11 +36,11 @@ class ItineraryViewModel(private val repository: ItineraryRepository) : ViewMode
         )
 
 
-    fun selectDay(dayId: Long?) { // Allow nullable dayId to clear selection
+    fun selectDay(dayId: Long?) { 
         _selectedDayId.value = dayId
     }
 
-    // ItineraryDay CRUD
+    
     fun addItineraryDay(dayLabel: String, date: String) = viewModelScope.launch {
         repository.insertDay(ItineraryDay(dayLabel = dayLabel, date = date))
     }
@@ -51,15 +51,15 @@ class ItineraryViewModel(private val repository: ItineraryRepository) : ViewMode
 
     fun deleteItineraryDay(day: ItineraryDay) = viewModelScope.launch {
         repository.deleteDay(day)
-        // If the deleted day was selected, clear the selection
+        
         if (_selectedDayId.value == day.id) {
             _selectedDayId.value = null
         }
     }
 
-    // ItineraryActivity CRUD
+    
     fun addItineraryActivity(dayId: Long, time: String, name: String, emoji: String?) = viewModelScope.launch {
-        // Ensure a day is selected or passed and is valid
+        
         if (dayId != 0L) {
             repository.insertActivity(
                 ItineraryActivity(
@@ -81,7 +81,7 @@ class ItineraryViewModel(private val repository: ItineraryRepository) : ViewMode
     }
 }
 
-// ViewModel Factory to provide the Repository to the ViewModel
+
 class ItineraryViewModelFactory(private val repository: ItineraryRepository) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(ItineraryViewModel::class.java)) {
