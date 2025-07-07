@@ -1,9 +1,17 @@
+import java.util.Properties
+val localProperties = Properties()
+val localPropertiesFile = rootProject.file("local.properties") // Correct path to root project's file
+if (localPropertiesFile.exists()) {
+    localProperties.load(localPropertiesFile.inputStream())
+}
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.ksp)
 }
+
 
 android {
     namespace = "com.meshkipli.smarttravel"
@@ -17,7 +25,8 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        buildConfigField("String", "GEMINI_API_KEY", "\"${properties["gemini.api.key"]}\"")
+        val geminiApiKey = localProperties.getProperty("gemini.api.key") ?: "" // Provide a default or handle missing key
+        buildConfigField("String", "GEMINI_API_KEY", "\"$geminiApiKey\"")
     }
 
     buildTypes {
