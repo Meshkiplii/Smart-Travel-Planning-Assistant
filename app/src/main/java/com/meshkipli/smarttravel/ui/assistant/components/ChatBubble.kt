@@ -16,15 +16,19 @@ import androidx.compose.material.icons.filled.ErrorOutline
 import androidx.compose.material.icons.filled.SmartToy
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.halilibo.richtext.markdown.Markdown
+import com.halilibo.richtext.ui.material3.RichText
 import com.meshkipli.smarttravel.ui.assistant.Author
 import com.meshkipli.smarttravel.ui.assistant.ChatMessage
 
@@ -93,12 +97,23 @@ fun ChatBubble(message: ChatMessage) {
                         strokeWidth = 2.dp
                     )
                 } else {
-                    Text(
-                        text = message.content,
-                        color = textColor,
-                        modifier = Modifier.padding(16.dp),
-                        lineHeight = 22.sp
-                    )
+                    CompositionLocalProvider(
+                        LocalContentColor provides textColor,
+                        // You might need to adjust LocalTextStyle if the library doesn't pick it up
+                        // LocalTextStyle provides MaterialTheme.typography.bodyLarge.copy(color = textColor)
+                    ) {
+                        RichText(
+                            modifier = Modifier.padding(16.dp)
+                        ) {
+                            // The Markdown composable parses and prepares the content
+                            Markdown(
+                                content = message.content,
+                                // You can provide custom renderers here if needed
+                                // commonmarkFeatures = CommonmarkAstNodeParser.DEFAULT_FEATURES,
+                                // onLinkClicked = { /* handle link clicks */ }
+                            )
+                        }
+                    }
                 }
             }
         }
