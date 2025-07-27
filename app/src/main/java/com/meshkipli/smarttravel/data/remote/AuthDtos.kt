@@ -1,8 +1,8 @@
-package com.meshkipli.smarttravel.data.remote
+package com.meshkipli.smarttravel.data.remote // Or your preferred package structure
 
-import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
+// --- Registration Data Classes (already defined) ---
 @Serializable
 data class RegisterRequest(
     val email: String,
@@ -16,6 +16,22 @@ data class RegisterResponse(
     val user: UserDto
 )
 
+// --- Login Data Classes ---
+@Serializable
+data class LoginRequest(
+    val email: String,
+    val password: String
+)
+
+@Serializable
+data class LoginResponse(
+    val status: String,
+    val message: String,
+    val token: String,
+    val user: UserDto // Reusing the UserDto from registration
+)
+
+// --- Shared Data Classes (already defined) ---
 @Serializable
 data class UserDto(
     val id: String,
@@ -25,9 +41,8 @@ data class UserDto(
     val role: String
 )
 
-// You might also want a generic error response class if the API returns structured errors
 @Serializable
 data class ApiErrorResponse(
-    val message: String? = null, // Adjust based on actual error structure
+    val message: String? = null,
     val errors: List<String>? = null
 )

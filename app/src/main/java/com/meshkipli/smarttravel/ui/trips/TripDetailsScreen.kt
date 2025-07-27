@@ -1,4 +1,4 @@
-package com.meshkipli.smarttravel.screens
+package com.meshkipli.smarttravel.ui.trips
 
 import android.content.Intent
 import androidx.compose.foundation.Image

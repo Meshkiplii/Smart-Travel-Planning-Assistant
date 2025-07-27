@@ -65,19 +65,23 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.material.icons.extended)
     implementation(libs.androidx.core.splashscreen)
+    implementation("androidx.datastore:datastore-preferences:1.1.7")
     implementation("com.halilibo.compose-richtext:richtext-ui-material3:0.20.0")
     implementation("com.halilibo.compose-richtext:richtext-commonmark:0.20.0")
   // Ktor Client Core
-    implementation("io.ktor:ktor-client-core:3.2,2") // Check for the latest 
+//    implementation("io.ktor:ktor-client-plugins:3.2.2")
+    implementation("io.ktor:ktor-client-core:2.3.7") // Check for the latest
 //    implementation("io.ktor:ktor-client-cio:2.3.12")
     // Or, for Android specific engine (might have better integration with Android features):
-    implementation("io.ktor:ktor-client-android:3.2.2")
+    implementation("io.ktor:ktor-client-android:2.3.7")
     // Or, if you prefer OkHttp:
-    // implementation("io.ktor:ktor-client-okhttp:2.3.12")
+    implementation("io.ktor:ktor-client-okhttp:2.3.7")
+    implementation("io.ktor:ktor-client-plugins:2.3.7")
 
     // Ktor Content Negotiation & Kotlinx Serialization
-    implementation("io.ktor:ktor-client-content-negotiation:3.2.2")
-    implementation("io.ktor:ktor-serialization-kotlinx-json:3.2.2")
+    implementation("io.ktor:ktor-client-content-negotiation:2.3.7")
+    implementation("io.ktor:ktor-serialization-kotlinx-json:2.3.7")
+    implementation("io.coil-kt:coil-compose:2.7.0")
 
 
     // Kotlinx Serialization JSON (if not already present)

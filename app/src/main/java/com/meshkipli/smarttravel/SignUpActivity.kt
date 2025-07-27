@@ -35,6 +35,7 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.meshkipli.smarttravel.ui.auth.AuthTextField
 import com.meshkipli.smarttravel.ui.auth.SignUpViewModel
 import com.meshkipli.smarttravel.ui.theme.SmartTravelTheme // Assuming you have this
 

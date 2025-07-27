@@ -13,7 +13,7 @@ navigation = "2.9.1"
 room = "2.7.2"
 ksp = "2.0.21-1.0.28"
 lifecycle = "2.9.1"
-gemini = "0.7.0"
+gemini = "0.9.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }

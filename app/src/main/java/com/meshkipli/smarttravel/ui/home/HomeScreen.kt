@@ -1,4 +1,4 @@
-package com.meshkipli.smarttravel.screens
+package com.meshkipli.smarttravel.ui.home
 
 import android.annotation.SuppressLint
 import android.content.Intent
@@ -31,10 +31,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.meshkipli.smarttravel.MapActivity
 import com.meshkipli.smarttravel.R
 import com.meshkipli.smarttravel.TripDetailsActivity
-import com.meshkipli.smarttravel.TripsActivity
 
 
 data class Location(
@@ -52,14 +52,14 @@ fun LocationCard(location: Location, modifier: Modifier = Modifier) {
         modifier = modifier
             .width(180.dp)
             .height(240.dp)
-        .clickable { // Make the whole Card clickable
-        val intent = Intent(context, TripDetailsActivity::class.java).apply {
-            putExtra("location_title", location.title)
-            putExtra("location_image_res", location.imageRes)
+            .clickable { // Make the whole Card clickable
+                val intent = Intent(context, TripDetailsActivity::class.java).apply {
+                    putExtra("location_title", location.title)
+                    putExtra("location_image_res", location.imageRes)
 
-        }
-        context.startActivity(intent)
-    },
+                }
+                context.startActivity(intent)
+            },
 
         shape = RoundedCornerShape(20.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
@@ -192,7 +192,11 @@ fun LocationCategoryRow(
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
-fun HomeScreen() {
+fun HomeScreen(
+//    onNavigateToProfile: () -> Unit,
+    onNavigateToTrips: () -> Unit,
+    homeViewModel: HomeViewModel = viewModel() // Obtain ViewModel instance
+) {
     // --- Dummy Data ---
     val popularLocations1 = listOf(
         Location(R.drawable.img_switzerland, "Switzerland", price = "$699", rating = 4.9),
@@ -206,7 +210,7 @@ fun HomeScreen() {
     val context = LocalContext.current
     val orangeColor = Color(0xFFF9882B)
     var searchText by remember { mutableStateOf("") }
-
+    val userName by homeViewModel.userName.collectAsState()
     Scaffold(
         containerColor = Color.White,
     ) { innerPadding ->
@@ -225,7 +229,7 @@ fun HomeScreen() {
                     fontSize = 16.sp
                 )
                 Text(
-                    text = "Sydney Australia",
+                    text = userName,
                     fontSize = 28.sp,
                     fontWeight = FontWeight.Bold,
                     color = Color.Black
@@ -276,8 +280,9 @@ fun HomeScreen() {
             Spacer(modifier = Modifier.height(24.dp))
             LocationCategoryRow(title = "Destinations", locations = popularLocations2 ,
                 onViewMoreClicked = {
-                    val intent = Intent(context, TripsActivity::class.java)
-                    context.startActivity(intent)
+//                    val intent = Intent(context, TripsActivity::class.java)
+//                    context.startActivity(intent)
+                    onNavigateToTrips()
                 })
             Spacer(modifier = Modifier.height(24.dp))
         }
@@ -290,6 +295,6 @@ fun HomeScreen() {
 @Composable
 fun HomeScreenPreview() {
     MaterialTheme {
-        HomeScreen()
+        HomeScreen(onNavigateToTrips = {})
     }
 }
