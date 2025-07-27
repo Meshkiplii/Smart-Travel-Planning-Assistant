@@ -10,6 +10,7 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.ksp)
+    kotlin("plugin.serialization") version "1.9.23"
 }
 
 
@@ -66,6 +67,22 @@ dependencies {
     implementation(libs.androidx.core.splashscreen)
     implementation("com.halilibo.compose-richtext:richtext-ui-material3:0.20.0")
     implementation("com.halilibo.compose-richtext:richtext-commonmark:0.20.0")
+  // Ktor Client Core
+    implementation("io.ktor:ktor-client-core:3.2,2") // Check for the latest 
+//    implementation("io.ktor:ktor-client-cio:2.3.12")
+    // Or, for Android specific engine (might have better integration with Android features):
+    implementation("io.ktor:ktor-client-android:3.2.2")
+    // Or, if you prefer OkHttp:
+    // implementation("io.ktor:ktor-client-okhttp:2.3.12")
+
+    // Ktor Content Negotiation & Kotlinx Serialization
+    implementation("io.ktor:ktor-client-content-negotiation:3.2.2")
+    implementation("io.ktor:ktor-serialization-kotlinx-json:3.2.2")
+
+
+    // Kotlinx Serialization JSON (if not already present)
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3") // Check latest
+
     // Room
     implementation(libs.room.runtime)
     implementation(libs.room.ktx)

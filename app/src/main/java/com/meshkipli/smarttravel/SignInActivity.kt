@@ -38,6 +38,7 @@ fun AuthTextField(
     onValueChange: (String) -> Unit,
     placeholderText: String,
     leadingIcon: androidx.compose.ui.graphics.vector.ImageVector,
+    isError: Boolean = false,
     // isPasswordField: Boolean = false, // This parameter is less direct than visualTransformation
     visualTransformation: VisualTransformation = VisualTransformation.None // Ensure this is present and used
 ) {
