@@ -57,7 +57,7 @@ object NavRoutes {
     const val WALLET = "wallet"
     const val ASSISTANT = "assistant"
     const val ADD_ITINERARY_ROUTE = "addItinerary"
-    const val TOUR_DETAILS_ROUTE = "tourDetails"
+    const val TOUR_DETAILS_ROUTE = "tourDetail"
     const val TRIPS_ROUTE = "trips"
 }
 
@@ -166,6 +166,10 @@ fun MainNavigationScreen() {
                 HomeScreen(
                     onNavigateToTrips= {
                         navController.navigate(NavRoutes.TRIPS_ROUTE)
+
+                    },
+                     onNavigateToTourDetails = { tourId ->
+                        navController.navigate("${NavRoutes.TOUR_DETAILS_ROUTE}/$tourId")
                     }
                 )
             }
@@ -197,7 +201,7 @@ fun MainNavigationScreen() {
                TripsScreen(
                    onNavigateBack = { navController.popBackStack()},
                    onNavigateToTourDetails = { tourId ->
-                       navController.navigate("tourDetail/$tourId")
+                       navController.navigate("${NavRoutes.TOUR_DETAILS_ROUTE}/$tourId")
                    }
                )
            }

@@ -1,6 +1,7 @@
 package com.meshkipli.smarttravel.ui.home
 
 import android.annotation.SuppressLint
+import android.app.Application
 import android.content.Intent
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.Image
@@ -32,47 +33,87 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import coil.compose.AsyncImage
 import com.meshkipli.smarttravel.MapActivity
 import com.meshkipli.smarttravel.R
 import com.meshkipli.smarttravel.TripDetailsActivity
+import com.meshkipli.smarttravel.data.remote.DestinationDto
+import com.meshkipli.smarttravel.data.remote.TourDto
+import com.meshkipli.smarttravel.data.repository.TourRepository
 
 
 data class Location(
-    @DrawableRes val imageRes: Int,
-    val title: String,
-    val price: String? = null,
-    val rating: Double? = null,
-    val subtitle: String? = null
+    val id: String? = null,
+    @DrawableRes val imageRes: Int = 0,
+    val imageUrl: String? = null, // Nullable
+    val title: String,            // Non-nullable
+    val price: String? = null,    // Nullable
+    val rating: Double? = null,   // Nullable
+    val subtitle: String? = null  // Nullable
 )
 
+fun mapTourDtoToLocation(tourDto: TourDto): Location {
+    return Location(
+        id = tourDto.id,
+        imageUrl = tourDto.coverImage, // Use the image URL from TourDto
+        title = tourDto.title,
+        subtitle = tourDto.destination.name,
+         price = tourDto.pricePerPerson?.let { "from $$it" }
+//         rating = 4.0
+    )
+}
+
+fun mapDestinationDtoToLocation(destinationDto: DestinationDto): Location {
+    return Location(
+        imageUrl = destinationDto.coverImage,
+        title = destinationDto.name,
+        // subtitle = "${destinationDto.region}, ${destinationDto.country}" // Example subtitle
+        subtitle = destinationDto.country ?: destinationDto.region ?: "" // More robust subtitle
+        // price and rating are likely not available in DestinationDto, so they'll be null
+    )
+}
 @Composable
-fun LocationCard(location: Location, modifier: Modifier = Modifier) {
+fun LocationCard(location: Location, onNavigateToTourDetails: (String) -> Unit, modifier: Modifier = Modifier) {
     val context = LocalContext.current
     Card(
         modifier = modifier
             .width(180.dp)
             .height(240.dp)
             .clickable { // Make the whole Card clickable
-                val intent = Intent(context, TripDetailsActivity::class.java).apply {
-                    putExtra("location_title", location.title)
-                    putExtra("location_image_res", location.imageRes)
-
+                if (location.id != null) {
+                    onNavigateToTourDetails(location.id)
                 }
-                context.startActivity(intent)
+
             },
 
         shape = RoundedCornerShape(20.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
-            // Background Image
-            Image(
-                painter = painterResource(id = location.imageRes), // Use Coil/Glide in a real app
-                contentDescription = location.title,
-                contentScale = ContentScale.Crop,
-                modifier = Modifier.fillMaxSize()
-            )
-            // Gradient scrim for text readability
+            if (location.imageUrl != null) {
+                AsyncImage(
+                    model = location.imageUrl,
+                    contentDescription = location.title,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.fillMaxSize(),
+//                    placeholder = painterResource(id = R.drawable.img_placeholder), // Optional placeholder
+//                    error = painterResource(id = R.drawable.img_placeholder) // Optional error image
+                )
+            } else if (location.imageRes != 0) {
+                Image(
+                    painter = painterResource(id = location.imageRes),
+                    contentDescription = location.title,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.fillMaxSize()
+                )
+            } else {
+                // Fallback for when no image is available
+                Box(modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.LightGray)) {
+                    Text("No Image", modifier = Modifier.align(Alignment.Center))
+                }
+            }
             Box(
                 modifier = Modifier
                     .fillMaxSize()
@@ -84,7 +125,6 @@ fun LocationCard(location: Location, modifier: Modifier = Modifier) {
                         )
                     )
             )
-            // Text and Info Content
             Box(
                 modifier = Modifier
                     .fillMaxSize()
@@ -99,7 +139,6 @@ fun LocationCard(location: Location, modifier: Modifier = Modifier) {
                         fontWeight = FontWeight.Bold
                     )
                     Spacer(modifier = Modifier.height(4.dp))
-                    // Conditional content based on location type
                     if (location.price != null && location.rating != null) {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
@@ -121,7 +160,7 @@ fun LocationCard(location: Location, modifier: Modifier = Modifier) {
                                 Icon(
                                     imageVector = Icons.Filled.Star,
                                     contentDescription = "Rating",
-                                    tint = Color(0xFFFFC107),
+                                    tint = Color(0xFFFFC107), // Yellow for star
                                     modifier = Modifier
                                         .size(18.dp)
                                         .padding(start = 4.dp)
@@ -141,10 +180,12 @@ fun LocationCard(location: Location, modifier: Modifier = Modifier) {
     }
 }
 
+
 @Composable
 fun LocationCategoryRow(
     title: String,
     locations: List<Location>,
+    onNavigateToTourDetails: (String) -> Unit,
     onViewMoreClicked: (() -> Unit)? = null // Add a callback for "View More"
 ) {
     val orangeColor = Color(0xFFF9882B) // Define your orange color
@@ -182,7 +223,7 @@ fun LocationCategoryRow(
             horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             items(locations) { location ->
-                LocationCard(location = location)
+                LocationCard(location = location,  onNavigateToTourDetails = onNavigateToTourDetails)
             }
         }
     }
@@ -193,24 +234,32 @@ fun LocationCategoryRow(
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun HomeScreen(
-//    onNavigateToProfile: () -> Unit,
     onNavigateToTrips: () -> Unit,
-    homeViewModel: HomeViewModel = viewModel() // Obtain ViewModel instance
+    onNavigateToTourDetails: (String) -> Unit,
+    // How you get tourRepository instance here depends on your setup
+    // For simplicity, creating it directly here, but ideally from a DI container or graph
+    homeViewModel: HomeViewModel = viewModel(
+        factory = HomeViewModelFactory(
+            LocalContext.current.applicationContext as Application,
+            TourRepository() // Or get it from a proper DI source
+        )
+    )
 ) {
     // --- Dummy Data ---
-    val popularLocations1 = listOf(
-        Location(R.drawable.img_switzerland, "Switzerland", price = "$699", rating = 4.9),
-        Location(R.drawable.img_ilulissat, "Ilulissat Ic...", price = "$726", rating = 4.8)
-    )
-    val popularLocations2 = listOf(
-        Location(R.drawable.img_western_strait, "Western Strait", subtitle = "16 locations"),
-        Location(R.drawable.img_beach_house, "Beach House", subtitle = "22 locations"),
-        Location(R.drawable.img_mountain_view, "Mountain View", subtitle = "36 locations")
-    )
+ 
+//    val popularLocations2 = listOf(
+//        Location(R.drawable.img_western_strait, "Western Strait", subtitle = "16 locations"),
+//        Location(R.drawable.img_beach_house, "Beach House", subtitle = "22 locations"),
+//        Location(R.drawable.img_mountain_view, "Mountain View", subtitle = "36 locations")
+//    )
     val context = LocalContext.current
     val orangeColor = Color(0xFFF9882B)
     var searchText by remember { mutableStateOf("") }
-    val userName by homeViewModel.userName.collectAsState()
+    val uiState by homeViewModel.uiState.collectAsState()
+    val popularLocationsFromApi = uiState.popularTours.map { tourDto ->
+        mapTourDtoToLocation(tourDto) // Your existing mapper function
+    }
+    val destinationLocations = uiState.destinations.map { mapDestinationDtoToLocation(it) }
     Scaffold(
         containerColor = Color.White,
     ) { innerPadding ->
@@ -229,7 +278,7 @@ fun HomeScreen(
                     fontSize = 16.sp
                 )
                 Text(
-                    text = userName,
+                    text = uiState.userName,
                     fontSize = 28.sp,
                     fontWeight = FontWeight.Bold,
                     color = Color.Black
@@ -276,14 +325,57 @@ fun HomeScreen(
             }
             Spacer(modifier = Modifier.height(24.dp))
             // Location Sections
-            LocationCategoryRow(title = "Popular locations", locations = popularLocations1)
+            if (uiState.isLoadingDestinations) {
+                Box(modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator()
+                }
+            }
+            uiState.destinationsError?.let { error ->
+                // Display error for destinations
+                Text("Error loading destinations: $error", color = MaterialTheme.colorScheme.error, modifier = Modifier.padding(horizontal = 20.dp))
+            }
+            if (!uiState.isLoadingDestinations && uiState.destinationsError == null && destinationLocations.isNotEmpty()) {
+                LocationCategoryRow(
+                    title = "Destinations",
+                    locations = destinationLocations,
+                    onNavigateToTourDetails = onNavigateToTourDetails
+                    // Use the mapped destinations
+                    // onViewMoreClicked = { /* Optional: Navigate to a "all destinations" screen */ }
+                )
+            } else if (!uiState.isLoadingDestinations && uiState.destinationsError == null && destinationLocations.isEmpty()) {
+                Text("No destinations found.", modifier = Modifier.padding(horizontal = 20.dp))
+            }
+//            LocationCategoryRow(title = "Destinations", locations = popularLocations1)
             Spacer(modifier = Modifier.height(24.dp))
-            LocationCategoryRow(title = "Destinations", locations = popularLocations2 ,
-                onViewMoreClicked = {
+//            LocationCategoryRow(title = "Popular Locations", locations = popularLocations2 ,
+//                onViewMoreClicked = {
+////                    val intent = Intent(context, TripsActivity::class.java)
+////                    context.startActivity(intent)
+//                    onNavigateToTrips()
+//                })
+
+            if (uiState.isLoadingPopularTours) {
+                CircularProgressIndicator()
+            }
+
+            uiState.popularToursError?.let { error ->
+                Text("Error: $error", color = MaterialTheme.colorScheme.error)
+            }
+
+            if (!uiState.isLoadingPopularTours && uiState.popularToursError == null) {
+                LocationCategoryRow(
+                    title = "Popular Locations",
+                    locations = popularLocationsFromApi,
+                    onNavigateToTourDetails = onNavigateToTourDetails,
+                    onViewMoreClicked = {
 //                    val intent = Intent(context, TripsActivity::class.java)
 //                    context.startActivity(intent)
-                    onNavigateToTrips()
-                })
+                        onNavigateToTrips()
+                    }
+                    // ...
+
+                )
+            }
             Spacer(modifier = Modifier.height(24.dp))
         }
     }
@@ -295,6 +387,6 @@ fun HomeScreen(
 @Composable
 fun HomeScreenPreview() {
     MaterialTheme {
-        HomeScreen(onNavigateToTrips = {})
+        HomeScreen(onNavigateToTrips = {}, onNavigateToTourDetails = {})
     }
 }

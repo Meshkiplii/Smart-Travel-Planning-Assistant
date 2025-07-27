@@ -1,12 +1,13 @@
 package com.meshkipli.smarttravel.data.repository
 
+import com.meshkipli.smarttravel.data.remote.DestinationsApiResponse
 import com.meshkipli.smarttravel.data.remote.KtorClient
 import com.meshkipli.smarttravel.data.remote.TourDto
 import com.meshkipli.smarttravel.data.remote.ToursApiResponse
 import io.ktor.client.call.*
 import io.ktor.client.plugins.*
 import io.ktor.client.request.*
-import io.ktor.http.*
+import io.ktor.http.HttpStatusCode
 
 
 class TourRepository {
@@ -44,6 +45,25 @@ class TourRepository {
             NetworkResult.Exception(IllegalStateException("Failed to parse tours response: ${e.message}", e))
         } catch (e: Exception) {
             println("Generic Exception in getAllTours: ${e.message}")
+            NetworkResult.Exception(e)
+        }
+    }
+
+
+    suspend fun getAllDestinations(): NetworkResult<DestinationsApiResponse> {
+        return try {
+            val response: DestinationsApiResponse = client.get("https://tours-backend-elvinega2959-ev1ay7cf.leapcell.dev/api/destinations").body()
+            NetworkResult.Success(response)
+        } catch (e: ClientRequestException) {
+            // Error handling for 4xx/5xx responses if you have a specific error body
+            NetworkResult.Error(code = HttpStatusCode.fromValue(e.response.status.value), message = e.message ?: "Client error")
+        } catch (e: ServerResponseException) {
+            NetworkResult.Error(code = HttpStatusCode.fromValue(e.response.status.value), message = "Server error: ${e.message}")
+        } catch (e: NoTransformationFoundException) {
+            // This can happen if the JSON structure doesn't match your DTOs
+            NetworkResult.Exception(RuntimeException("JSON parsing error: ${e.localizedMessage}", e))
+        } catch (e: Exception) {
+            // For other errors like network issues, UnknownHostException, etc.
             NetworkResult.Exception(e)
         }
     }
