@@ -224,10 +224,7 @@ fun TripDetailsScreen(onNavigateBack: () -> Unit) {
                 // Plan Trip Button
                 Button(
                     onClick = {
-                        val intent = Intent(context, ScheduleTripActivity::class.java).apply {
 
-                        }
-                        context.startActivity(intent)
                     },
                     modifier = Modifier
                         .fillMaxWidth()

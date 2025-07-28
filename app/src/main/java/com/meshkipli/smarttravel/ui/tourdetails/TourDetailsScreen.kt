@@ -33,6 +33,7 @@ import com.meshkipli.smarttravel.data.repository.TourRepository
 fun TourDetailsScreen(
     tourId: String,
     onNavigateBack: () -> Unit,
+    onPlanTripClicked: (tourId: String, title: String, description: String?, coverImageUrl: String?) -> Unit,
     // Example of providing the factory. Better to use Hilt or a DI graph.
     viewModelFactory: TourDetailsViewModelFactory = TourDetailsViewModelFactory(TourRepository())
 ) {
@@ -64,7 +65,15 @@ fun TourDetailsScreen(
                 }
             }
             uiState.tour != null -> {
-                TourDetailsContent(tour = uiState.tour!!, modifier = Modifier.padding(paddingValues))
+                TourDetailsContent(tour = uiState.tour!!,   onPlanTripClicked = {
+                    // Pass necessary details to the TripPlannerScreen
+                    onPlanTripClicked(
+                        tourId, // or tour.id if available and preferred
+                        uiState.tour!!.title,
+                        uiState.tour!!.description, // Description
+                        uiState.tour!!.coverImage // Cover Image URL
+                    )
+                }, modifier = Modifier.padding(paddingValues))
             }
             else -> {
                  Box(modifier = Modifier.fillMaxSize().padding(paddingValues), contentAlignment = Alignment.Center) {
@@ -76,7 +85,7 @@ fun TourDetailsScreen(
 }
 
 @Composable
-fun TourDetailsContent(tour: TourDto, modifier: Modifier = Modifier) {
+fun TourDetailsContent(tour: TourDto,onPlanTripClicked: () -> Unit , modifier: Modifier = Modifier) {
     val context = LocalContext.current
     val orangeColor = Color(0xFFF9882B)
     Column(
@@ -151,10 +160,7 @@ fun TourDetailsContent(tour: TourDto, modifier: Modifier = Modifier) {
         // Plan Trip Button
         Button(
             onClick = {
-                val intent = Intent(context, ScheduleTripActivity::class.java).apply {
-
-                }
-                context.startActivity(intent)
+                onPlanTripClicked() // Call the new callback
             },
             modifier = Modifier
                 .fillMaxWidth()

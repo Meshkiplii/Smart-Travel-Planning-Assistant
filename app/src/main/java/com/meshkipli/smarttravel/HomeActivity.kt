@@ -21,6 +21,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavType
@@ -32,10 +33,13 @@ import com.meshkipli.smarttravel.ui.home.HomeScreen
 import com.meshkipli.smarttravel.ui.itinerary.ItineraryFormScreen
 import com.meshkipli.smarttravel.ui.wallet.WalletScreen
 import com.meshkipli.smarttravel.ui.BottomNavItem
+import com.meshkipli.smarttravel.ui.Screen
 import com.meshkipli.smarttravel.ui.assistant.AssistantRoute
 import com.meshkipli.smarttravel.ui.itinerary.AddItineraryScreen
 import com.meshkipli.smarttravel.ui.theme.SmartTravelTheme
 import com.meshkipli.smarttravel.ui.tourdetails.TourDetailsScreen
+import com.meshkipli.smarttravel.ui.trips.TripDetailsScreen
+import com.meshkipli.smarttravel.ui.trips.TripPlannerScreen
 import com.meshkipli.smarttravel.ui.trips.TripsScreen
 
 class HomeActivity : ComponentActivity() {
@@ -213,13 +217,55 @@ fun MainNavigationScreen() {
                if (tourId != null) {
                    TourDetailsScreen(
                        tourId = tourId,
-                       onNavigateBack = { navController.popBackStack() }
-                       // ViewModel will be created with savedStateHandle providing tourId
+                       onNavigateBack = { navController.popBackStack() },
+                       onPlanTripClicked = { id, title, description, coverUrl ->
+
+                           navController.navigate(
+                               Screen.TripPlanner.createRoute(
+                                   tripTitle = title,
+                                   tripDescription = description,
+                                   coverImageUrl = coverUrl // pass it differently. For now, assuming title/desc are sufficient.
+                               )
+                           )
+                       }
                    )
                } else {
                    // Handle error: tourId not found (should not happen if navigation is correct)
                    Text("Error: Tour ID missing.")
                }
+           }
+           composable(
+               route = Screen.TripPlanner.route,
+               arguments = listOf(
+                   navArgument("tripTitle") { type = NavType.StringType },
+                   navArgument("tripDescription") {
+                       type = NavType.StringType
+                       nullable = true
+                       defaultValue = null
+                   },
+                   navArgument("coverImageUrl") { // Add argument for cover image
+                       type = NavType.StringType
+                       nullable = true
+                       defaultValue = null
+                   }
+               )
+           ) { backStackEntry ->
+               val encodedTripTitle = backStackEntry.arguments?.getString("tripTitle")
+               val tripTitle = encodedTripTitle?.let { java.net.URLDecoder.decode(it, "UTF-8") }
+
+               val encodedTripDescription = backStackEntry.arguments?.getString("tripDescription")
+               val tripDescription = encodedTripDescription?.let { java.net.URLDecoder.decode(it, "UTF-8") }
+
+               val encodedCoverImageUrl = backStackEntry.arguments?.getString("coverImageUrl")
+               val coverImageUrl = encodedCoverImageUrl?.let { java.net.URLDecoder.decode(it, "UTF-8") }
+
+               TripPlannerScreen(
+                   tripTitle = tripTitle,
+                   tripDescription = tripDescription,
+                   coverImageUrl = coverImageUrl, // Pass it here
+                   onNavigateBack = { navController.popBackStack() },
+                   viewModel = viewModel() // Ensure ViewModel is correctly provided if needed
+               )
            }
         }
     }
