@@ -171,25 +171,7 @@ fun SignInScreen(
 
 
                 Spacer(modifier = Modifier.height(32.dp))
-                OrContinueWithDivider()
-                Spacer(modifier = Modifier.height(32.dp))
-                SocialLoginButton(
-                    text = "Continue with Google",
-                    iconPainter = painterResource(id = R.drawable.ic_google_logo), // Ensure these drawables exist
-                    backgroundColor = Color.Black,
-                    contentColor = Color.White,
-                    onClick = onSignInWithGoogle,
-                    enabled = !isLoading
-                )
-                Spacer(modifier = Modifier.height(16.dp))
-                SocialLoginButton(
-                    text = "Continue with Facebook",
-                    iconPainter = painterResource(id = R.drawable.ic_facebook_logo), // Ensure these drawables exist
-                    backgroundColor = Color(0xFF3B5998),
-                    contentColor = Color.White,
-                    onClick = onSignInWithFacebook,
-                    enabled = !isLoading
-                )
+
             } // End of scrollable column
 
             Button(

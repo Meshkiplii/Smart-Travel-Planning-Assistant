@@ -10,9 +10,12 @@ import com.meshkipli.smarttravel.data.remote.DestinationDto
 import com.meshkipli.smarttravel.data.remote.TourDto // Import TourDto
 import com.meshkipli.smarttravel.data.repository.NetworkResult // Import NetworkResult
 import com.meshkipli.smarttravel.data.repository.TourRepository // Import TourRepository
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
@@ -62,6 +65,8 @@ class HomeViewModel(
         started = SharingStarted.WhileSubscribed(5000),
         initialValue = HomeUiState(userName = "Loading...", isLoadingPopularTours = true) // Ensure initial state matches combined logic
     )
+    private val _navigateToLogin = MutableSharedFlow<Unit>()
+    val navigateToLogin: SharedFlow<Unit> = _navigateToLogin.asSharedFlow()
 
 
     init {
@@ -150,9 +155,18 @@ class HomeViewModel(
     fun logout() {
         viewModelScope.launch {
             userPreferencesRepository.clearUserSession()
-            // Navigation or other app-wide state updates would go here
-            // For example, you might want to clear tour data as well or reset _tourState
-            // _tourState.value = HomeUiState(isLoadingPopularTours = false) // Reset tour state on logout
+            // Optionally reset UI state related to user-specific data
+            _tourState.value = HomeUiState(
+                userName = "Guest", // Or some default logged-out state
+                // Keep other states if they are not user-specific,
+                // or reset them as needed.
+                isLoadingPopularTours = false, // Or true if you want to reload on next login
+                popularTours = emptyList(),    // Example: clear user-specific recommendations
+                isLoadingDestinations = false,
+                destinations = emptyList()
+            )
+            // Emit event to navigate
+            _navigateToLogin.emit(Unit)
         }
     }
 }
